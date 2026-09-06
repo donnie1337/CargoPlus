@@ -20,9 +20,13 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (sender instanceof Player player && !plugin.isAuthenticated(player)) {
+            sender.sendMessage(msg("not-authenticated"));
+            return true;
+        }
+
         String commandName = command.getName().toLowerCase(Locale.ROOT);
 
-        // /cargo <subcomando> ... e /cargoplus <subcomando> ...
         if (commandName.equals("cargo")) {
             if (args.length == 0) {
                 sender.sendMessage(msg("usage"));
@@ -34,9 +38,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             return executeSubcommand(sender, sub, subArgs);
         }
 
-        // Comandos diretos: /promover, /setcargo e /removercargo.
-        // Antes o executor tratava o nome do jogador como subcomando,
-        // fazendo esses comandos sempre cair no /usage.
         return executeSubcommand(sender, commandName, args);
     }
 
@@ -85,7 +86,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Permite a primeira promoção: membro -> ajudante.
         String next = plugin.groups().next(current);
         if (next == null) {
             sender.sendMessage(msg("already-top"));
