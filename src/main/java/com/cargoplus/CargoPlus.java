@@ -120,12 +120,14 @@ public final class CargoPlus extends JavaPlugin {
             return;
         }
         permissions.ensureUser(player);
+        permissions.apply(player, permissions.getUser(player.getUniqueId()));
         saveAsync();
     }
 
     public void setGroup(Player player, String group) {
         permissions.setGroup(player, group);
-        if (!isAuthenticated(player)) permissions.remove(player);
+        if (isAuthenticated(player)) permissions.apply(player, permissions.getUser(player.getUniqueId()));
+        else permissions.remove(player);
         saveAsync();
     }
 
@@ -148,7 +150,10 @@ public final class CargoPlus extends JavaPlugin {
             if (oldPermissions != null) oldPermissions.clearAll();
             for (Player player : getServer().getOnlinePlayers()) {
                 permissions.remove(player);
-                if (isAuthenticated(player)) permissions.ensureUser(player);
+                if (isAuthenticated(player)) {
+                    permissions.ensureUser(player);
+                    permissions.apply(player, permissions.getUser(player.getUniqueId()));
+                }
             }
             registerApi();
             saveAsync();
