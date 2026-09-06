@@ -10,10 +10,12 @@ import com.cargoplus.storage.Storage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +54,10 @@ public final class CargoPlus extends JavaPlugin {
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         registerApi();
-        for (Player player : getServer().getOnlinePlayers()) ensureUser(player);
+        for (Player player : getServer().getOnlinePlayers()) {
+            permissions.remove(player);
+            if (isAuthenticated(player)) ensureUser(player);
+        }
         getLogger().info("CargoPlus ativado com " + groups.all().size() + " cargos.");
     }
 
@@ -77,11 +82,8 @@ public final class CargoPlus extends JavaPlugin {
         if (permissions != null) permissions.clearAll();
         saveExecutor.shutdown();
         if (storage != null) {
-            try {
-                storage.save();
-            } catch (IOException ex) {
-                getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage());
-            }
+            try { storage.save(); }
+            catch (IOException ex) { getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage()); }
         }
     }
 
@@ -99,13 +101,31 @@ public final class CargoPlus extends JavaPlugin {
     public PermissionService permissions() { return permissions; }
     public CargoPlusAPI api() { return api; }
 
+    public boolean isAuthenticated(Player player) {
+        if (player == null || !player.isOnline()) return false;
+        Plugin auth = getServer().getPluginManager().getPlugin("AuthSystem");
+        if (auth == null || !auth.isEnabled()) return false;
+        try {
+            Method method = auth.getClass().getMethod("isAuthenticated", Player.class);
+            Object result = method.invoke(auth, player);
+            return result instanceof Boolean && (Boolean) result;
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            return false;
+        }
+    }
+
     public void ensureUser(Player player) {
+        if (!isAuthenticated(player)) {
+            permissions.remove(player);
+            return;
+        }
         permissions.ensureUser(player);
         saveAsync();
     }
 
     public void setGroup(Player player, String group) {
         permissions.setGroup(player, group);
+        if (!isAuthenticated(player)) permissions.remove(player);
         saveAsync();
     }
 
@@ -113,7 +133,6 @@ public final class CargoPlus extends JavaPlugin {
         try {
             reloadConfig();
             loadMessages();
-
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
@@ -127,7 +146,10 @@ public final class CargoPlus extends JavaPlugin {
             api = newApi;
 
             if (oldPermissions != null) oldPermissions.clearAll();
-            for (Player player : getServer().getOnlinePlayers()) permissions.ensureUser(player);
+            for (Player player : getServer().getOnlinePlayers()) {
+                permissions.remove(player);
+                if (isAuthenticated(player)) permissions.ensureUser(player);
+            }
             registerApi();
             saveAsync();
             sender.sendMessage(message("reloaded"));
@@ -141,11 +163,8 @@ public final class CargoPlus extends JavaPlugin {
         final Storage currentStorage = storage;
         final Map<java.util.UUID, UserData> snapshot = currentStorage.snapshot();
         saveExecutor.execute(() -> {
-            try {
-                currentStorage.saveSnapshot(snapshot);
-            } catch (IOException ex) {
-                getLogger().warning("Falha ao salvar dados: " + ex.getMessage());
-            }
+            try { currentStorage.saveSnapshot(snapshot); }
+            catch (IOException ex) { getLogger().warning("Falha ao salvar dados: " + ex.getMessage()); }
         });
     }
 }
