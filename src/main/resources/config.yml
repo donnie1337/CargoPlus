@@ -3,9 +3,8 @@ storage:
 
 default-group: membro
 
-# Os cargos existentes e a ordem de promoção são definidos aqui.
-# Para criar outro cargo, adicione uma nova entrada em groups e coloque o nome
-# na posição desejada da hierarchy. Não existe comando para criar cargos.
+# Os cargos e a ordem de promoção são definidos aqui.
+# Para criar ou renomear cargos, altere somente este arquivo.
 hierarchy:
   - membro
   - ajudante
@@ -36,7 +35,7 @@ groups:
       - ajudante
   administrador:
     display-name: "Administrador"
-    prefix: "&c[Admin] "
+    prefix: "&c[ADM] "
     permissions:
       - chat.global
       - chat.staff
@@ -48,6 +47,9 @@ groups:
     permissions:
       - chat.global
       - chat.staff
+      - cargoplus.promover
+      - cargoplus.setcargo
+      - cargoplus.removercargo
     parents:
       - administrador
   dono:
@@ -57,5 +59,9 @@ groups:
       - chat.global
       - chat.staff
       - chat.admin
+      - cargoplus.promover
+      - cargoplus.setcargo
+      - cargoplus.removercargo
+      - cargoplus.admin
     parents:
       - gerente
