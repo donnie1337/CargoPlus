@@ -57,8 +57,18 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (plugin.groups().indexOf(current) < 0) { sender.sendMessage(msg("invalid-group")); return true; }
         String next = plugin.groups().next(current);
         if (next == null) { sender.sendMessage(msg("already-top")); return true; }
+
+        var nextGroup = plugin.groups().get(next);
         plugin.setGroup(target, next);
-        sender.sendMessage(msg("promoted").replace("{player}", target.getName()).replace("{group}", plugin.groups().get(next).displayName()));
+
+        String promotedMessage = msg("promotion-title")
+                .replace("{player}", target.getName())
+                .replace("{group}", nextGroup.displayName());
+        target.sendTitle(promotedMessage, "", 10, 70, 20);
+
+        sender.sendMessage(msg("promoted")
+                .replace("{player}", target.getName())
+                .replace("{group}", nextGroup.displayName()));
         return true;
     }
 
