@@ -1,0 +1,15 @@
+name: CargoPlus
+version: 1.0.0
+main: com.cargoplus.CargoPlus
+api-version: '26.2'
+author: donnie1337
+description: Sistema seguro de cargos e permissoes.
+commands:
+  cargo:
+    description: Gerencia cargos e permissoes do CargoPlus.
+    usage: /cargo <grupo|usuario|promover|rebaixar|reload>
+    permission: cargoplus.admin
+permissions:
+  cargoplus.admin:
+    description: Permite administrar o CargoPlus.
+    default: op
