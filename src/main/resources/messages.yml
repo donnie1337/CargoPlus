@@ -1,5 +1,6 @@
 no-permission: "&cVocê não possui permissão para isso."
 player-only: "&cEste comando só pode ser usado por um jogador."
+not-authenticated: "&cVocê precisa estar autenticado para utilizar o CargoPlus."
 usage: "&eUse: /promover <jogador> | /setcargo <jogador> <cargo> | /removercargo <jogador> | /cargo reload"
 usage-promover: "&eUse: /promover <jogador>"
 usage-setcargo: "&eUse: /setcargo <jogador> <cargo>"
