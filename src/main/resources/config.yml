@@ -3,6 +3,9 @@ storage:
 
 default-group: membro
 
+# Os cargos existentes e a ordem de promoção são definidos aqui.
+# Para criar outro cargo, adicione uma nova entrada em groups e coloque o nome
+# na posição desejada da hierarchy. Não existe comando para criar cargos.
 hierarchy:
   - membro
   - ajudante
@@ -20,30 +23,39 @@ groups:
   ajudante:
     display-name: "Ajudante"
     prefix: "&7[Ajudante] "
-    permissions: []
+    permissions:
+      - chat.staff
     parents:
       - membro
   moderador:
     display-name: "Moderador"
     prefix: "&2[Moderador] "
-    permissions: []
+    permissions:
+      - chat.staff
     parents:
       - ajudante
   administrador:
     display-name: "Administrador"
     prefix: "&c[Admin] "
-    permissions: []
+    permissions:
+      - chat.global
+      - chat.staff
     parents:
       - moderador
   gerente:
     display-name: "Gerente"
     prefix: "&6[Gerente] "
-    permissions: []
+    permissions:
+      - chat.global
+      - chat.staff
     parents:
       - administrador
   dono:
     display-name: "Dono"
     prefix: "&4[Dono] "
-    permissions: []
+    permissions:
+      - chat.global
+      - chat.staff
+      - chat.admin
     parents:
       - gerente
