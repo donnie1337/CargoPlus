@@ -19,7 +19,9 @@ commands:
     permission: cargoplus.removercargo
   cargo:
     description: Administração do CargoPlus.
-    usage: /cargo reload
+    usage: /cargo <promover|setcargo|removercargo|reload>
+    aliases:
+      - cargoplus
     permission: cargoplus.admin
 permissions:
   cargoplus.promover:
@@ -32,5 +34,5 @@ permissions:
     description: Permite remover o cargo de jogadores.
     default: false
   cargoplus.admin:
-    description: Permite recarregar o CargoPlus.
+    description: Permite recarregar o CargoPlus e administrar o comando principal.
     default: false
