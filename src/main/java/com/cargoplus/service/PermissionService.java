@@ -2,19 +2,22 @@ package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
 import com.cargoplus.storage.Storage;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.permissions.PermissionAttachment;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PermissionService {
+    private final JavaPlugin plugin;
     private final Storage storage;
     private final GroupService groups;
     private final Map<UUID, PermissionAttachment> attachments = new ConcurrentHashMap<>();
 
-    public PermissionService(Storage storage, GroupService groups) {
+    public PermissionService(JavaPlugin plugin, Storage storage, GroupService groups) {
+        this.plugin = plugin;
         this.storage = storage;
         this.groups = groups;
     }
@@ -26,12 +29,11 @@ public final class PermissionService {
     }
 
     public String getGroup(UUID uuid) { return getUser(uuid).group(); }
-
     public String getPrefix(UUID uuid) { return groups.prefix(getGroup(uuid)); }
 
     public boolean hasPermission(UUID uuid, String permission) {
         if (permission == null || permission.isBlank() || permission.length() > 128) return false;
-        Player player = Bukkit.getPlayer(uuid);
+        Player player = plugin.getServer().getPlayer(uuid);
         return player != null && player.hasPermission(permission);
     }
 
@@ -54,8 +56,7 @@ public final class PermissionService {
 
     public synchronized void apply(Player player, UserData user) {
         remove(player);
-        PermissionAttachment attachment = player.addAttachment(Bukkit.getPluginManager().getPlugin("CargoPlus"));
-        if (attachment == null) return;
+        PermissionAttachment attachment = player.addAttachment(plugin);
         for (String permission : groups.resolvePermissions(user.group())) attachment.setPermission(permission, true);
         attachments.put(player.getUniqueId(), attachment);
     }
@@ -66,6 +67,6 @@ public final class PermissionService {
     }
 
     public synchronized void clearAll() {
-        for (Player player : Bukkit.getOnlinePlayers()) remove(player);
+        for (Player player : plugin.getServer().getOnlinePlayers()) remove(player);
     }
 }
