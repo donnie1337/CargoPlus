@@ -41,8 +41,9 @@ public final class CargoPlus extends JavaPlugin {
         }
         permissions = new PermissionService(this, storage, groups);
         api = new CargoPlusAPI(permissions, groups);
-        getCommand("cargo").setExecutor(new CargoCommand(this));
-        getCommand("cargo").setTabCompleter(new CargoCommand(this));
+        CargoCommand command = new CargoCommand(this);
+        getCommand("cargo").setExecutor(command);
+        getCommand("cargo").setTabCompleter(command);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
         for (Player player : getServer().getOnlinePlayers()) ensureUser(player);
@@ -79,9 +80,10 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     public void reloadPlugin(CommandSender sender) {
-        reloadConfig();
-        loadMessages();
         try {
+            permissions.clearAll();
+            reloadConfig();
+            loadMessages();
             GroupService newGroups = new GroupService(getConfig());
             storage.load();
             groups = newGroups;
@@ -89,6 +91,7 @@ public final class CargoPlus extends JavaPlugin {
             api = new CargoPlusAPI(permissions, groups);
             getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
             for (Player player : getServer().getOnlinePlayers()) permissions.ensureUser(player);
+            saveAsync();
             sender.sendMessage(message("reloaded"));
         } catch (Exception ex) {
             getLogger().severe("Reload abortado: " + ex.getMessage());
