@@ -5,11 +5,32 @@ api-version: '26.2'
 author: donnie1337
 description: Sistema seguro de cargos e permissoes.
 commands:
+  promover:
+    description: Promove um jogador para o próximo cargo da hierarquia.
+    usage: /promover <jogador>
+    permission: cargoplus.promover
+  setcargo:
+    description: Define um cargo configurado para um jogador.
+    usage: /setcargo <jogador> <cargo>
+    permission: cargoplus.setcargo
+  removercargo:
+    description: Remove o cargo personalizado e retorna o jogador ao cargo padrão.
+    usage: /removercargo <jogador>
+    permission: cargoplus.removercargo
   cargo:
-    description: Gerencia cargos e permissoes do CargoPlus.
-    usage: /cargo <grupo|usuario|promover|rebaixar|reload>
+    description: Recarrega o CargoPlus.
+    usage: /cargo reload
     permission: cargoplus.admin
 permissions:
+  cargoplus.promover:
+    description: Permite promover jogadores dentro da hierarquia configurada.
+    default: op
+  cargoplus.setcargo:
+    description: Permite definir cargos configurados para jogadores.
+    default: op
+  cargoplus.removercargo:
+    description: Permite remover o cargo de jogadores.
+    default: op
   cargoplus.admin:
-    description: Permite administrar o CargoPlus.
+    description: Permite recarregar o CargoPlus.
     default: op
