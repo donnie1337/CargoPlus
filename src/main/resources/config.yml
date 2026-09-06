@@ -1,0 +1,49 @@
+storage:
+  file: data.yml
+
+default-group: membro
+
+hierarchy:
+  - membro
+  - ajudante
+  - moderador
+  - administrador
+  - gerente
+  - dono
+
+groups:
+  membro:
+    display-name: "Membro"
+    prefix: ""
+    permissions: []
+    parents: []
+  ajudante:
+    display-name: "Ajudante"
+    prefix: "&7[Ajudante] "
+    permissions: []
+    parents:
+      - membro
+  moderador:
+    display-name: "Moderador"
+    prefix: "&2[Moderador] "
+    permissions: []
+    parents:
+      - ajudante
+  administrador:
+    display-name: "Administrador"
+    prefix: "&c[Admin] "
+    permissions: []
+    parents:
+      - moderador
+  gerente:
+    display-name: "Gerente"
+    prefix: "&6[Gerente] "
+    permissions: []
+    parents:
+      - administrador
+  dono:
+    display-name: "Dono"
+    prefix: "&4[Dono] "
+    permissions: []
+    parents:
+      - gerente
