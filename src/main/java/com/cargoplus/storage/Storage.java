@@ -15,9 +15,7 @@ public final class Storage {
     private final File file;
     private final Map<UUID, UserData> users = new LinkedHashMap<>();
 
-    public Storage(File dataFolder, String fileName) {
-        this.file = new File(dataFolder, fileName);
-    }
+    public Storage(File dataFolder, String fileName) { this.file = new File(dataFolder, fileName); }
 
     public synchronized void load() throws IOException {
         users.clear();
@@ -34,21 +32,22 @@ public final class Storage {
                 String name = section.getString(key + ".name", "");
                 String group = section.getString(key + ".group", "membro");
                 users.put(uuid, new UserData(uuid, name, group));
-            } catch (IllegalArgumentException ignored) {
-                // Ignore corrupted individual entries instead of aborting the entire plugin.
-            }
+            } catch (IllegalArgumentException ignored) { }
         }
     }
 
-    public synchronized void save() throws IOException {
+    public synchronized void save() throws IOException { saveSnapshot(users); }
+
+    public void saveSnapshot(Map<UUID, UserData> snapshot) throws IOException {
         if (file.getParentFile() != null) file.getParentFile().mkdirs();
         YamlConfiguration yaml = new YamlConfiguration();
-        for (UserData user : users.values()) {
+        for (UserData user : snapshot.values()) {
             String path = "users." + user.uuid();
             yaml.set(path + ".name", user.name());
             yaml.set(path + ".group", user.group());
         }
-        File temp = new File(file.getParentFile(), file.getName() + ".tmp");
+        File parent = file.getParentFile() == null ? new File(".") : file.getParentFile();
+        File temp = new File(parent, file.getName() + ".tmp");
         yaml.save(temp);
         try {
             Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
@@ -58,8 +57,6 @@ public final class Storage {
     }
 
     public synchronized UserData get(UUID uuid) { return users.get(uuid); }
-
     public synchronized void put(UserData user) { users.put(user.uuid(), user); }
-
     public synchronized Map<UUID, UserData> snapshot() { return Map.copyOf(users); }
 }
