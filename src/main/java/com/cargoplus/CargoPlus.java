@@ -41,13 +41,22 @@ public final class CargoPlus extends JavaPlugin {
         }
         permissions = new PermissionService(this, storage, groups);
         api = new CargoPlusAPI(permissions, groups);
-        CargoCommand command = new CargoCommand(this);
-        getCommand("cargo").setExecutor(command);
-        getCommand("cargo").setTabCompleter(command);
+        registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
         for (Player player : getServer().getOnlinePlayers()) ensureUser(player);
         getLogger().info("CargoPlus ativado com " + groups.all().size() + " cargos.");
+    }
+
+    private void registerCommands() {
+        CargoCommand command = new CargoCommand(this);
+        for (String name : new String[]{"promover", "setcargo", "removercargo", "cargo"}) {
+            var registered = getCommand(name);
+            if (registered != null) {
+                registered.setExecutor(command);
+                registered.setTabCompleter(command);
+            }
+        }
     }
 
     @Override
