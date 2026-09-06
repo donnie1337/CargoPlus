@@ -3,7 +3,6 @@ package com.cargoplus;
 import com.cargoplus.api.CargoPlusAPI;
 import com.cargoplus.command.CargoCommand;
 import com.cargoplus.listener.PlayerListener;
-import com.cargoplus.model.UserData;
 import com.cargoplus.service.GroupService;
 import com.cargoplus.service.PermissionService;
 import com.cargoplus.storage.Storage;
@@ -15,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,7 +50,7 @@ public final class CargoPlus extends JavaPlugin {
 
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
-        getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
+        registerApi();
         for (Player player : getServer().getOnlinePlayers()) ensureUser(player);
         getLogger().info("CargoPlus ativado com " + groups.all().size() + " cargos.");
     }
@@ -66,6 +64,11 @@ public final class CargoPlus extends JavaPlugin {
                 registered.setTabCompleter(command);
             }
         }
+    }
+
+    private void registerApi() {
+        getServer().getServicesManager().unregisterAll(this);
+        getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
     }
 
     @Override
@@ -107,11 +110,13 @@ public final class CargoPlus extends JavaPlugin {
 
     public synchronized void reloadPlugin(CommandSender sender) {
         try {
+            reloadConfig();
+            loadMessages();
+
             // Monta e valida tudo antes de trocar o estado ativo.
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
-            Map<UUID, UserData> snapshot = newStorage.snapshot();
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
 
@@ -123,24 +128,22 @@ public final class CargoPlus extends JavaPlugin {
 
             if (oldPermissions != null) oldPermissions.clearAll();
             for (Player player : getServer().getOnlinePlayers()) permissions.ensureUser(player);
-            getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
-            loadMessages();
-            saveSnapshotAsync(snapshot);
+            registerApi();
+            saveAsync();
             sender.sendMessage(message("reloaded"));
         } catch (Exception ex) {
             getLogger().severe("Reload abortado: " + ex.getMessage());
-            sender.sendMessage("§cNão foi possível recarregar o CargoPlus. O estado anterior foi preservado.");
+            sender.sendMessage("§cNão foi possível recarregar o CargoPlus. Verifique o console.");
         }
     }
 
     private void saveAsync() {
-        saveSnapshotAsync(storage.snapshot());
-    }
-
-    private void saveSnapshotAsync(Map<UUID, UserData> snapshot) {
+        Map<com.cargoplus.model.UserData, com.cargoplus.model.UserData> unused = null;
+        final Storage currentStorage = storage;
+        final Map<java.util.UUID, com.cargoplus.model.UserData> snapshot = currentStorage.snapshot();
         saveExecutor.execute(() -> {
             try {
-                storage.saveSnapshot(snapshot);
+                currentStorage.saveSnapshot(snapshot);
             } catch (IOException ex) {
                 getLogger().warning("Falha ao salvar dados: " + ex.getMessage());
             }
