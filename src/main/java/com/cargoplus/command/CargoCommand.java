@@ -41,6 +41,15 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         return executeSubcommand(sender, commandName, args);
     }
 
+    private boolean hasCargoPermission(CommandSender sender, String permission) {
+        // O console do servidor é uma origem administrativa confiável.
+        // Jogadores continuam sujeitos aos nós de permissão do CargoPlus.
+        if (!(sender instanceof Player)) {
+            return true;
+        }
+        return sender.hasPermission(permission);
+    }
+
     private boolean executeSubcommand(CommandSender sender, String sub, String[] args) {
         return switch (sub) {
             case "promover" -> promote(sender, args);
@@ -55,7 +64,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean reload(CommandSender sender) {
-        if (!sender.hasPermission("cargoplus.admin")) {
+        if (!hasCargoPermission(sender, "cargoplus.admin")) {
             sender.sendMessage(msg("no-permission"));
             return true;
         }
@@ -64,7 +73,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean promote(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("cargoplus.promover")) {
+        if (!hasCargoPermission(sender, "cargoplus.promover")) {
             sender.sendMessage(msg("no-permission"));
             return true;
         }
@@ -99,7 +108,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean setCargo(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("cargoplus.setcargo")) {
+        if (!hasCargoPermission(sender, "cargoplus.setcargo")) {
             sender.sendMessage(msg("no-permission"));
             return true;
         }
@@ -127,7 +136,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean removeCargo(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("cargoplus.removercargo")) {
+        if (!hasCargoPermission(sender, "cargoplus.removercargo")) {
             sender.sendMessage(msg("no-permission"));
             return true;
         }
