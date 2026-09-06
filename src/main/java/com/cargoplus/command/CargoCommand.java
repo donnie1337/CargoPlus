@@ -64,7 +64,11 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         String promotedMessage = msg("promotion-title")
                 .replace("{player}", target.getName())
                 .replace("{group}", nextGroup.displayName());
-        target.sendTitle(promotedMessage, "", 10, 70, 20);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (plugin.isAuthenticated(online)) {
+                online.sendTitle(promotedMessage, "", 10, 70, 20);
+            }
+        }
 
         sender.sendMessage(msg("promoted")
                 .replace("{player}", target.getName())
