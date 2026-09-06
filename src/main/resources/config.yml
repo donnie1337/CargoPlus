@@ -17,12 +17,14 @@ groups:
   membro:
     display-name: "Membro"
     prefix: ""
-    permissions: []
+    permissions:
+      - chat.local
     parents: []
   ajudante:
     display-name: "Ajudante"
     prefix: "&7[Ajudante] "
     permissions:
+      - chat.local
       - chat.staff
     parents:
       - membro
@@ -30,6 +32,7 @@ groups:
     display-name: "Moderador"
     prefix: "&2[Moderador] "
     permissions:
+      - chat.local
       - chat.staff
     parents:
       - ajudante
@@ -37,6 +40,7 @@ groups:
     display-name: "Administrador"
     prefix: "&c[ADM] "
     permissions:
+      - chat.local
       - chat.global
       - chat.staff
     parents:
@@ -45,6 +49,7 @@ groups:
     display-name: "Gerente"
     prefix: "&6[Gerente] "
     permissions:
+      - chat.local
       - chat.global
       - chat.staff
       - cargoplus.promover
@@ -56,6 +61,7 @@ groups:
     display-name: "Dono"
     prefix: "&4[Dono] "
     permissions:
+      - chat.local
       - chat.global
       - chat.staff
       - chat.admin
