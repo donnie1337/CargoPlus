@@ -16,7 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class CargoPlus extends JavaPlugin {
     private GroupService groups;
@@ -24,6 +25,11 @@ public final class CargoPlus extends JavaPlugin {
     private PermissionService permissions;
     private CargoPlusAPI api;
     private Map<String, String> messages;
+    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "CargoPlus-Save");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     @Override
     public void onEnable() {
@@ -31,16 +37,19 @@ public final class CargoPlus extends JavaPlugin {
         saveResource("messages.yml", false);
         loadMessages();
         try {
-            groups = new GroupService(getConfig());
-            storage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
-            storage.load();
+            GroupService loadedGroups = new GroupService(getConfig());
+            Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
+            loadedStorage.load();
+            groups = loadedGroups;
+            storage = loadedStorage;
+            permissions = new PermissionService(this, storage, groups);
+            api = new CargoPlusAPI(permissions, groups);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        permissions = new PermissionService(this, storage, groups);
-        api = new CargoPlusAPI(permissions, groups);
+
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
@@ -62,8 +71,13 @@ public final class CargoPlus extends JavaPlugin {
     @Override
     public void onDisable() {
         if (permissions != null) permissions.clearAll();
+        saveExecutor.shutdown();
         if (storage != null) {
-            try { storage.save(); } catch (IOException ex) { getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage()); }
+            try {
+                storage.save();
+            } catch (IOException ex) {
+                getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage());
+            }
         }
     }
 
@@ -73,7 +87,10 @@ public final class CargoPlus extends JavaPlugin {
         for (String key : yaml.getKeys(false)) messages.put(key, yaml.getString(key, ""));
     }
 
-    public String message(String key) { return ChatColor.translateAlternateColorCodes('&', messages.getOrDefault(key, "&cMensagem não configurada: " + key)); }
+    public String message(String key) {
+        return ChatColor.translateAlternateColorCodes('&', messages.getOrDefault(key, "&cMensagem não configurada: " + key));
+    }
+
     public GroupService groups() { return groups; }
     public PermissionService permissions() { return permissions; }
     public CargoPlusAPI api() { return api; }
@@ -88,31 +105,45 @@ public final class CargoPlus extends JavaPlugin {
         saveAsync();
     }
 
-    public void reloadPlugin(CommandSender sender) {
+    public synchronized void reloadPlugin(CommandSender sender) {
         try {
-            permissions.clearAll();
-            reloadConfig();
-            loadMessages();
+            // Monta e valida tudo antes de trocar o estado ativo.
             GroupService newGroups = new GroupService(getConfig());
-            storage.load();
+            Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
+            newStorage.load();
+            Map<UUID, UserData> snapshot = newStorage.snapshot();
+            PermissionService newPermissions = new PermissionService(this, newStorage, newGroups);
+            CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
+
+            PermissionService oldPermissions = permissions;
             groups = newGroups;
-            permissions = new PermissionService(this, storage, groups);
-            api = new CargoPlusAPI(permissions, groups);
-            getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
+            storage = newStorage;
+            permissions = newPermissions;
+            api = newApi;
+
+            if (oldPermissions != null) oldPermissions.clearAll();
             for (Player player : getServer().getOnlinePlayers()) permissions.ensureUser(player);
-            saveAsync();
+            getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
+            loadMessages();
+            saveSnapshotAsync(snapshot);
             sender.sendMessage(message("reloaded"));
         } catch (Exception ex) {
             getLogger().severe("Reload abortado: " + ex.getMessage());
-            sender.sendMessage("§cNão foi possível recarregar o CargoPlus. Verifique o console.");
+            sender.sendMessage("§cNão foi possível recarregar o CargoPlus. O estado anterior foi preservado.");
         }
     }
 
     private void saveAsync() {
-        Map<UUID, UserData> snapshot = storage.snapshot();
-        CompletableFuture.runAsync(() -> {
-            try { storage.saveSnapshot(snapshot); }
-            catch (IOException ex) { getLogger().warning("Falha ao salvar dados: " + ex.getMessage()); }
+        saveSnapshotAsync(storage.snapshot());
+    }
+
+    private void saveSnapshotAsync(Map<UUID, UserData> snapshot) {
+        saveExecutor.execute(() -> {
+            try {
+                storage.saveSnapshot(snapshot);
+            } catch (IOException ex) {
+                getLogger().warning("Falha ao salvar dados: " + ex.getMessage());
+            }
         });
     }
 }
