@@ -39,9 +39,7 @@ public final class PermissionService {
 
     public synchronized void setGroup(Player player, String group) {
         if (player == null || groups.get(group) == null) throw new IllegalArgumentException("grupo inválido");
-        UserData user = new UserData(player.getUniqueId(), player.getName(), group);
-        storage.put(user);
-        apply(player, user);
+        storage.put(new UserData(player.getUniqueId(), player.getName(), group));
     }
 
     public synchronized void ensureUser(Player player) {
@@ -51,7 +49,6 @@ public final class PermissionService {
         } else if (!existing.name().equals(player.getName())) {
             storage.put(new UserData(existing.uuid(), player.getName(), existing.group()));
         }
-        apply(player, getUser(player.getUniqueId()));
     }
 
     public synchronized void apply(Player player, UserData user) {
@@ -62,6 +59,7 @@ public final class PermissionService {
     }
 
     public synchronized void remove(Player player) {
+        if (player == null) return;
         PermissionAttachment old = attachments.remove(player.getUniqueId());
         if (old != null) player.removeAttachment(old);
     }
