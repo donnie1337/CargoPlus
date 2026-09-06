@@ -3,6 +3,7 @@ package com.cargoplus;
 import com.cargoplus.api.CargoPlusAPI;
 import com.cargoplus.command.CargoCommand;
 import com.cargoplus.listener.PlayerListener;
+import com.cargoplus.model.UserData;
 import com.cargoplus.service.GroupService;
 import com.cargoplus.service.PermissionService;
 import com.cargoplus.storage.Storage;
@@ -113,7 +114,6 @@ public final class CargoPlus extends JavaPlugin {
             reloadConfig();
             loadMessages();
 
-            // Monta e valida tudo antes de trocar o estado ativo.
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
@@ -138,9 +138,8 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     private void saveAsync() {
-        Map<com.cargoplus.model.UserData, com.cargoplus.model.UserData> unused = null;
         final Storage currentStorage = storage;
-        final Map<java.util.UUID, com.cargoplus.model.UserData> snapshot = currentStorage.snapshot();
+        final Map<java.util.UUID, UserData> snapshot = currentStorage.snapshot();
         saveExecutor.execute(() -> {
             try {
                 currentStorage.saveSnapshot(snapshot);
