@@ -18,19 +18,19 @@ commands:
     usage: /removercargo <jogador>
     permission: cargoplus.removercargo
   cargo:
-    description: Recarrega o CargoPlus.
+    description: Administração do CargoPlus.
     usage: /cargo reload
     permission: cargoplus.admin
 permissions:
   cargoplus.promover:
     description: Permite promover jogadores dentro da hierarquia configurada.
-    default: op
+    default: false
   cargoplus.setcargo:
     description: Permite definir cargos configurados para jogadores.
-    default: op
+    default: false
   cargoplus.removercargo:
     description: Permite remover o cargo de jogadores.
-    default: op
+    default: false
   cargoplus.admin:
     description: Permite recarregar o CargoPlus.
-    default: op
+    default: false
