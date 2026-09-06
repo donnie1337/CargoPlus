@@ -42,8 +42,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean hasCargoPermission(CommandSender sender, String permission) {
-        // O console do servidor é uma origem administrativa confiável.
-        // Jogadores continuam sujeitos aos nós de permissão do CargoPlus.
         if (!(sender instanceof Player)) {
             return true;
         }
@@ -148,6 +146,12 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
             sender.sendMessage(msg("user-not-found"));
+            return true;
+        }
+
+        // Jogadores não podem remover o próprio cargo. O console continua podendo fazê-lo.
+        if (sender instanceof Player player && player.getUniqueId().equals(target.getUniqueId())) {
+            sender.sendMessage(msg("cannot-remove-self"));
             return true;
         }
 
