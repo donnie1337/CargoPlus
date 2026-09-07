@@ -16,9 +16,12 @@ commands:
   removercargo:
     description: Remove o cargo personalizado e retorna o jogador ao cargo padrão.
     usage: /removercargo <jogador>
+  cor:
+    description: Altera a cor do seu nickname sem alterar a cor do cargo.
+    usage: /cor <cor>
   cargo:
     description: Administração do CargoPlus.
-    usage: /cargo <promover|setcargo|removercargo|reload>
+    usage: /cargo <promover|setcargo|removercargo|cor|reload>
     aliases:
       - cargoplus
 permissions:
@@ -30,6 +33,9 @@ permissions:
     default: false
   cargoplus.removercargo:
     description: Permite remover o cargo de jogadores.
+    default: false
+  cargoplus.cor:
+    description: Permite alterar a cor do próprio nickname.
     default: false
   cargoplus.admin:
     description: Permite recarregar o CargoPlus e administrar o comando principal.
