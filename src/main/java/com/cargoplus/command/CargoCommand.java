@@ -77,11 +77,11 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean setCargo(CommandSender sender, String[] args) {
-        if (sender instanceof Player player && !player.isOp()) {
+        // /setcargo é exclusivamente administrativo e só pode ser executado pelo console.
+        if (sender instanceof Player) {
             sender.sendMessage(msg("no-permission"));
             return true;
         }
-        if (!hasCargoPermission(sender, "cargoplus.setcargo")) { sender.sendMessage(msg("no-permission")); return true; }
         if (args.length != 2) { sender.sendMessage(msg("usage-setcargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
@@ -109,7 +109,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             int executorRank = plugin.groups().indexOf(executorGroup);
             int targetRank = plugin.groups().indexOf(targetGroup);
 
-            // Só é permitido remover cargos abaixo do próprio cargo.
             if (executorRank < 0 || targetRank < 0 || targetRank >= executorRank) {
                 sender.sendMessage(msg("cannot-remove-higher"));
                 return true;
@@ -132,6 +131,8 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         }
         if (commandName.equals("promover") || commandName.equals("removercargo")) return args.length == 1 ? onlinePlayers(args[0]) : List.of();
         if (commandName.equals("setcargo")) {
+            // Não expõe sugestões de /setcargo para jogadores; somente o console deve utilizá-lo.
+            if (sender instanceof Player) return List.of();
             if (args.length == 1) return onlinePlayers(args[0]);
             if (args.length == 2) return partial(plugin.groups().hierarchy(), args[1]);
         }
