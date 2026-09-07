@@ -31,8 +31,8 @@ public final class Storage {
                 UUID uuid = UUID.fromString(key);
                 String name = section.getString(key + ".name", "");
                 String group = section.getString(key + ".group", "membro");
-                String nicknameColor = section.getString(key + ".nickname-color", "");
-                users.put(uuid, new UserData(uuid, name, group, nicknameColor));
+                String chatColor = section.getString(key + ".chat-color", section.getString(key + ".nickname-color", ""));
+                users.put(uuid, new UserData(uuid, name, group, chatColor));
             } catch (IllegalArgumentException ignored) { }
         }
     }
@@ -46,7 +46,7 @@ public final class Storage {
             String path = "users." + user.uuid();
             yaml.set(path + ".name", user.name());
             yaml.set(path + ".group", user.group());
-            if (!user.nicknameColor().isBlank()) yaml.set(path + ".nickname-color", user.nicknameColor());
+            if (!user.chatColor().isBlank()) yaml.set(path + ".chat-color", user.chatColor());
         }
         File parent = file.getParentFile() == null ? new File(".") : file.getParentFile();
         File temp = new File(parent, file.getName() + ".tmp");
