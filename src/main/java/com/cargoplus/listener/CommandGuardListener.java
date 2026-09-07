@@ -12,9 +12,9 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Camada central de segurança dos comandos executados por jogadores.
@@ -63,7 +63,7 @@ public final class CommandGuardListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommandSend(PlayerCommandSendEvent event) {
         Player player = event.getPlayer();
-        Set<String> commands = event.getCommands();
+        Collection<String> commands = event.getCommands();
         Iterator<String> iterator = commands.iterator();
 
         while (iterator.hasNext()) {
