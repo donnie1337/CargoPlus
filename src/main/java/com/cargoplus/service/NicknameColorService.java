@@ -6,29 +6,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class NicknameColorService {
     private static final String TEAM_PREFIX = "cp_";
     private final CargoPlusColorConfig colors;
-    private final Map<UUID, String> teams = new LinkedHashMap<>();
+    private final Map<UUID, String> teams = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors) {
         this.colors = colors;
     }
 
-    public String colorName(UserData user, GroupService groups) {
-        String configured = user.nicknameColor();
-        if (!configured.isBlank() && colors.isAllowed(configured)) return configured;
-        String groupColor = groups.nameColor(user.group());
-        return colors.isAllowed(groupColor) ? groupColor : colors.defaultColor();
-    }
-
     public ChatColor resolveColor(UserData user, GroupService groups) {
-        ChatColor color = colors.resolve(colorName(user, groups));
+        String groupColor = groups.nameColor(user.group());
+        ChatColor color = colors.resolve(groupColor);
         return color == null ? ChatColor.WHITE : color;
     }
 
@@ -44,7 +38,8 @@ public final class NicknameColorService {
         if (player == null) return;
         String teamName = teams.remove(player.getUniqueId());
         if (teamName != null) {
-            Team team = player.getScoreboard().getTeam(teamName);
+            Scoreboard scoreboard = player.getScoreboard();
+            Team team = scoreboard.getTeam(teamName);
             if (team != null) {
                 team.removeEntry(player.getName());
                 if (team.getEntries().isEmpty()) team.unregister();
@@ -59,7 +54,6 @@ public final class NicknameColorService {
         String teamName = TEAM_PREFIX + player.getUniqueId().toString().replace("-", "").substring(0, 13).toLowerCase(Locale.ROOT);
         Team current = scoreboard.getEntryTeam(player.getName());
         if (current != null && !current.getName().equals(teamName)) current.removeEntry(player.getName());
-
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
         team.setColor(color);
@@ -67,7 +61,5 @@ public final class NicknameColorService {
         teams.put(player.getUniqueId(), teamName);
     }
 
-    public Map<String, String> allowedColors() {
-        return colors.allowedColors();
-    }
+    public Map<String, String> allowedColors() { return colors.allowedColors(); }
 }
