@@ -2,6 +2,7 @@ package com.cargoplus;
 
 import com.cargoplus.api.CargoPlusAPI;
 import com.cargoplus.command.CargoCommand;
+import com.cargoplus.listener.CommandGuardListener;
 import com.cargoplus.listener.PlayerListener;
 import com.cargoplus.model.UserData;
 import com.cargoplus.service.CargoPlusColorConfig;
@@ -61,6 +62,7 @@ public final class CargoPlus extends JavaPlugin {
 
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        getServer().getPluginManager().registerEvents(new CommandGuardListener(this), this);
         registerApi();
         for (Player player : getServer().getOnlinePlayers()) {
             permissions.remove(player);
