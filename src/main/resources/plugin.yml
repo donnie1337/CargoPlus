@@ -17,8 +17,8 @@ commands:
     description: Remove o cargo personalizado e retorna o jogador ao cargo padrão.
     usage: /removercargo <jogador>
   cor:
-    description: Altera a cor do seu nickname sem alterar a cor do cargo.
-    usage: /cor <cor>
+    description: Abre o menu para escolher a cor do texto do chat.
+    usage: /cor
   cargo:
     description: Administração do CargoPlus.
     usage: /cargo <promover|setcargo|removercargo|cor|reload>
@@ -35,7 +35,7 @@ permissions:
     description: Permite remover o cargo de jogadores.
     default: false
   cargoplus.cor:
-    description: Permite alterar a cor do próprio nickname.
+    description: Permite escolher a cor do próprio texto no chat.
     default: false
   cargoplus.admin:
     description: Permite recarregar o CargoPlus e administrar o comando principal.
