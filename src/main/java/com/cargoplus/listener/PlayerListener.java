@@ -7,6 +7,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
@@ -14,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlayerListener implements Listener {
-    private static final long AUTH_TIMEOUT_TICKS = 20L * 90L;
+    private static final int DEFAULT_AUTH_TIMEOUT_SECONDS = 60;
     private final CargoPlus plugin;
     private final Map<UUID, BukkitTask> pending = new ConcurrentHashMap<>();
 
@@ -41,6 +43,8 @@ public final class PlayerListener implements Listener {
             }
         }, 1L, 2L);
         pending.put(uuid, task);
+
+        long timeoutTicks = getAuthenticationTimeoutSeconds() * 20L;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             BukkitTask current = pending.get(uuid);
             if (current == task) {
@@ -50,7 +54,15 @@ public final class PlayerListener implements Listener {
                     plugin.permissions().remove(player);
                 }
             }
-        }, AUTH_TIMEOUT_TICKS);
+        }, timeoutTicks);
+    }
+
+    private int getAuthenticationTimeoutSeconds() {
+        Plugin auth = Bukkit.getPluginManager().getPlugin("AuthSystem");
+        if (auth instanceof JavaPlugin javaPlugin && auth.isEnabled()) {
+            return Math.max(1, javaPlugin.getConfig().getInt("tempo-limite-login-segundos", DEFAULT_AUTH_TIMEOUT_SECONDS));
+        }
+        return DEFAULT_AUTH_TIMEOUT_SECONDS;
     }
 
     private boolean isAuthSystemAvailable() {
