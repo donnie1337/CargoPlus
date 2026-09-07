@@ -4,7 +4,9 @@ import com.cargoplus.api.CargoPlusAPI;
 import com.cargoplus.command.CargoCommand;
 import com.cargoplus.listener.PlayerListener;
 import com.cargoplus.model.UserData;
+import com.cargoplus.service.CargoPlusColorConfig;
 import com.cargoplus.service.GroupService;
+import com.cargoplus.service.NicknameColorService;
 import com.cargoplus.service.PermissionService;
 import com.cargoplus.storage.Storage;
 import org.bukkit.ChatColor;
@@ -26,6 +28,7 @@ public final class CargoPlus extends JavaPlugin {
     private PermissionService permissions;
     private CargoPlusAPI api;
     private Map<String, String> messages;
+    private NicknameColorService nicknameColors;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "CargoPlus-Save");
         thread.setDaemon(true);
@@ -41,9 +44,12 @@ public final class CargoPlus extends JavaPlugin {
             GroupService loadedGroups = new GroupService(getConfig());
             Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             loadedStorage.load();
+            CargoPlusColorConfig colorConfig = new CargoPlusColorConfig(getConfig());
+            NicknameColorService loadedNicknameColors = new NicknameColorService(colorConfig);
             groups = loadedGroups;
             storage = loadedStorage;
-            permissions = new PermissionService(this, storage, groups);
+            nicknameColors = loadedNicknameColors;
+            permissions = new PermissionService(this, storage, groups, nicknameColors);
             api = new CargoPlusAPI(permissions, groups);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
@@ -63,7 +69,7 @@ public final class CargoPlus extends JavaPlugin {
 
     private void registerCommands() {
         CargoCommand command = new CargoCommand(this);
-        for (String name : new String[]{"promover", "setcargo", "removercargo", "cargo"}) {
+        for (String name : new String[]{"promover", "setcargo", "removercargo", "cargo", "cor"}) {
             var registered = getCommand(name);
             if (registered != null) {
                 registered.setExecutor(command);
@@ -131,6 +137,16 @@ public final class CargoPlus extends JavaPlugin {
         saveAsync();
     }
 
+    public boolean setNicknameColor(Player player, String color) {
+        if (!isAuthenticated(player)) return false;
+        if (!permissions.setNicknameColor(player, color)) return false;
+        permissions.apply(player, permissions.getUser(player.getUniqueId()));
+        saveAsync();
+        return true;
+    }
+
+    public Map<String, String> nicknameColors() { return nicknameColors.allowedColors(); }
+
     public synchronized void reloadPlugin(CommandSender sender) {
         try {
             reloadConfig();
@@ -138,12 +154,14 @@ public final class CargoPlus extends JavaPlugin {
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
-            PermissionService newPermissions = new PermissionService(this, newStorage, newGroups);
+            NicknameColorService newNicknameColors = new NicknameColorService(new CargoPlusColorConfig(getConfig()));
+            PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
 
             PermissionService oldPermissions = permissions;
             groups = newGroups;
             storage = newStorage;
+            nicknameColors = newNicknameColors;
             permissions = newPermissions;
             api = newApi;
 
