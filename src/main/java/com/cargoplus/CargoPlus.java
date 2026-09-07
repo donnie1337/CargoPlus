@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class CargoPlus extends JavaPlugin {
     private GroupService groups;
@@ -98,10 +99,23 @@ public final class CargoPlus extends JavaPlugin {
     @Override
     public void onDisable() {
         if (permissions != null) permissions.clearAll();
-        saveExecutor.shutdown();
         if (storage != null) {
+            try {
+                saveExecutor.shutdown();
+                if (!saveExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    saveExecutor.shutdownNow();
+                    if (!saveExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
+                        getLogger().warning("A fila de salvamento do CargoPlus nao terminou antes do desligamento.");
+                    }
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                saveExecutor.shutdownNow();
+            }
             try { storage.save(); }
             catch (IOException ex) { getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage()); }
+        } else {
+            saveExecutor.shutdownNow();
         }
     }
 
@@ -204,9 +218,14 @@ public final class CargoPlus extends JavaPlugin {
     private void saveAsync() {
         final Storage currentStorage = storage;
         final Map<java.util.UUID, UserData> snapshot = currentStorage.snapshot();
-        saveExecutor.execute(() -> {
+        try {
+            saveExecutor.execute(() -> {
+                try { currentStorage.saveSnapshot(snapshot); }
+                catch (IOException ex) { getLogger().warning("Falha ao salvar dados: " + ex.getMessage()); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException ignored) {
             try { currentStorage.saveSnapshot(snapshot); }
             catch (IOException ex) { getLogger().warning("Falha ao salvar dados: " + ex.getMessage()); }
-        });
+        }
     }
 }
