@@ -21,8 +21,9 @@ import java.util.Locale;
  *
  * O console não passa por estes eventos e continua podendo executar comandos.
  * Para comandos do CargoPlus, a autorização vem exclusivamente do cargo
- * configurado no próprio CargoPlus. Para comandos de outros plugins, a
- * permissão Bukkit continua sendo respeitada normalmente.
+ * configurado no próprio CargoPlus. Para comandos integrados ao CargoPlus,
+ * como o /configurar do SistemaUtil, a permission é consultada diretamente
+ * no sistema de cargos, sem depender do PermissionAttachment do Bukkit.
  */
 public final class CommandGuardListener implements Listener {
     private final CargoPlus plugin;
@@ -60,7 +61,15 @@ public final class CommandGuardListener implements Listener {
         }
 
         String permission = command.getPermission();
-        if (permission == null || permission.isBlank() || !player.hasPermission(permission)) {
+        if (permission == null || permission.isBlank()) {
+            // Comando sem permission declarada é público. O próprio executor
+            // pode fazer uma validação específica, como o /configurar.
+            return;
+        }
+
+        if (isCargoManagedPermission(player, permission)) return;
+
+        if (!player.hasPermission(permission)) {
             deny(player);
             event.setCancelled(true);
         }
@@ -91,10 +100,17 @@ public final class CommandGuardListener implements Listener {
             }
 
             String permission = command.getPermission();
-            if (permission == null || permission.isBlank() || !player.hasPermission(permission)) {
-                iterator.remove();
-            }
+            if (permission == null || permission.isBlank()) continue;
+
+            if (isCargoManagedPermission(player, permission)) continue;
+
+            if (!player.hasPermission(permission)) iterator.remove();
         }
+    }
+
+    private boolean isCargoManagedPermission(Player player, String permission) {
+        if (player == null || permission == null || permission.isBlank()) return false;
+        return plugin.permissions().hasCargoPermission(player.getUniqueId(), permission);
     }
 
     private boolean isCargoPlusCommand(String label) {
@@ -111,7 +127,7 @@ public final class CommandGuardListener implements Listener {
             case "promover" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.promover");
             case "removercargo" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.removercargo");
             case "cargo", "cargoplus" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.admin");
-            case "setcargo" -> false; // console-only
+            case "setcargo" -> false;
             default -> false;
         };
     }
