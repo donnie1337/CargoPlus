@@ -10,7 +10,6 @@ commands:
   promover:
     description: Promove um jogador para o próximo cargo da hierarquia.
     usage: /promover <jogador>
-    permission: cargoplus.promover
   setcargo:
     description: Define um cargo configurado para um jogador.
     usage: /setcargo <jogador> <cargo>
