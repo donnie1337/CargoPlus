@@ -5,7 +5,7 @@ api-version: '26.2'
 author: donnie1337
 description: Sistema seguro de cargos e permissoes.
 softdepend:
-  - AuthSystem
+  - LoginPlus
 commands:
   promover:
     description: Promove um jogador para o próximo cargo da hierarquia.
