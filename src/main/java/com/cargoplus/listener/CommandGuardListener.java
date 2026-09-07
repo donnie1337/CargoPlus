@@ -47,25 +47,15 @@ public final class CommandGuardListener implements Listener {
             return;
         }
 
-        if (isCargoPlusCommand(label)) {
-            // O CargoCommand faz a validação detalhada de cada subcomando.
-            // O guard não deve impedir esses comandos por não terem permission:
-            // no plugin.yml, assim o console continua funcionando.
-            return;
-        }
+        if (isCargoPlusCommand(label)) return;
 
-        if (command == null) {
-            deny(player);
-            event.setCancelled(true);
-            return;
-        }
+        // Comandos não encontrados no CommandMap pertencem a outro plugin,
+        // a um alias dinâmico ou ao servidor. Deixamos o mecanismo normal do
+        // Bukkit decidir, evitando bloquear comandos legítimos por engano.
+        if (command == null) return;
 
         String permission = command.getPermission();
-        if (permission == null || permission.isBlank()) {
-            // Comando sem permission declarada é público. O próprio executor
-            // pode fazer uma validação específica, como o /configurar.
-            return;
-        }
+        if (permission == null || permission.isBlank()) return;
 
         if (isCargoManagedPermission(player, permission)) return;
 
@@ -95,7 +85,7 @@ public final class CommandGuardListener implements Listener {
 
             Command command = findCommand(label);
             if (command == null) {
-                iterator.remove();
+                // Não removemos comandos de outros plugins/aliases dinâmicos.
                 continue;
             }
 
