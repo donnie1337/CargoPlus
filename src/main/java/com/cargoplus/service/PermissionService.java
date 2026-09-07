@@ -34,7 +34,7 @@ public final class PermissionService {
 
     public String getGroup(UUID uuid) { return getUser(uuid).group(); }
     public String getPrefix(UUID uuid) { return groups.prefix(getGroup(uuid)); }
-    public String getNicknameColor(UUID uuid) { return nicknameColors.colorName(getUser(uuid), groups); }
+    public String getNicknameColor(UUID uuid) { return nicknameColors.resolveColor(getUser(uuid), groups).toString(); }
 
     public boolean hasPermission(UUID uuid, String permission) {
         if (permission == null || permission.isBlank() || permission.length() > 128) return false;
