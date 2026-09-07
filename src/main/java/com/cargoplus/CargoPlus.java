@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -40,7 +41,7 @@ public final class CargoPlus extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResource("messages.yml", false);
+        ensureMessagesFile();
         loadMessages();
         try {
             GroupService loadedGroups = new GroupService(getConfig());
@@ -71,6 +72,13 @@ public final class CargoPlus extends JavaPlugin {
         getLogger().info("CargoPlus ativado com " + groups.all().size() + " cargos.");
     }
 
+    private void ensureMessagesFile() {
+        File messagesFile = new File(getDataFolder(), "messages.yml");
+        if (!messagesFile.exists()) {
+            saveResource("messages.yml", false);
+        }
+    }
+
     private void registerCommands() {
         CargoCommand command = new CargoCommand(this);
         for (String name : new String[]{"promover", "setcargo", "removercargo", "cargo"}) {
@@ -98,7 +106,7 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     private void loadMessages() {
-        var yaml = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(new java.io.File(getDataFolder(), "messages.yml"));
+        var yaml = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(new File(getDataFolder(), "messages.yml"));
         messages = new java.util.HashMap<>();
         for (String key : yaml.getKeys(false)) messages.put(key, yaml.getString(key, ""));
     }
@@ -158,6 +166,7 @@ public final class CargoPlus extends JavaPlugin {
     public synchronized void reloadPlugin(CommandSender sender) {
         try {
             reloadConfig();
+            ensureMessagesFile();
             loadMessages();
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
