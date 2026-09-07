@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlayerListener implements Listener {
     private static final int DEFAULT_AUTH_TIMEOUT_SECONDS = 60;
+    private static final long AUTH_CHECK_INTERVAL_TICKS = 10L;
     private final CargoPlus plugin;
     private final Map<UUID, BukkitTask> pending = new ConcurrentHashMap<>();
 
@@ -41,10 +42,10 @@ public final class PlayerListener implements Listener {
                 plugin.ensureUser(player);
                 cancelPending(uuid);
             }
-        }, 1L, 2L);
+        }, 1L, AUTH_CHECK_INTERVAL_TICKS);
         pending.put(uuid, task);
 
-        long timeoutTicks = getAuthenticationTimeoutSeconds() * 20L;
+        long timeoutTicks = Math.max(1, getAuthenticationTimeoutSeconds()) * 20L;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             BukkitTask current = pending.get(uuid);
             if (current == task) {
