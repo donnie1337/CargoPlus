@@ -17,6 +17,7 @@ public final class CargoPlusAPI {
     public String getGroup(UUID uuid) { return permissions.getGroup(uuid); }
     public String getPrefix(UUID uuid) { return permissions.getPrefix(uuid); }
     public String getNicknameColor(UUID uuid) { return permissions.getNicknameColor(uuid); }
+    public String getChatColor(UUID uuid) { return permissions.getChatColor(uuid); }
     public boolean hasPermission(UUID uuid, String permission) { return permissions.hasPermission(uuid, permission); }
     public GroupService groups() { return groups; }
 }
