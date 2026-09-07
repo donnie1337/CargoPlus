@@ -12,18 +12,17 @@ public final class CargoPlusColorConfig {
     private final String defaultColor;
 
     public CargoPlusColorConfig(FileConfiguration config) {
-        var section = config.getConfigurationSection("nickname.colors");
+        var section = config.getConfigurationSection("chat.colors");
         if (section != null) {
             for (String rawName : section.getKeys(false)) {
                 String name = normalize(rawName);
-                String code = section.getString(rawName, "");
-                ChatColor color = parse(code);
+                ChatColor color = parse(section.getString(rawName, ""));
                 if (!name.isBlank() && color != null) colors.put(name, color.name());
             }
         }
-        String configuredDefault = normalize(config.getString("nickname.default-color", "branco"));
-        defaultColor = colors.containsKey(configuredDefault) ? configuredDefault : (colors.isEmpty() ? "branco" : colors.keySet().iterator().next());
         if (colors.isEmpty()) colors.put("branco", ChatColor.WHITE.name());
+        String configuredDefault = normalize(config.getString("chat.default-color", "branco"));
+        defaultColor = colors.containsKey(configuredDefault) ? configuredDefault : colors.keySet().iterator().next();
     }
 
     public String defaultColor() { return defaultColor; }
