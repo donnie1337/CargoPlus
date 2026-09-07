@@ -124,7 +124,12 @@ public final class PermissionService {
         PermissionAttachment old = attachments.remove(player.getUniqueId());
         if (old != null) player.removeAttachment(old);
         nicknameColors.remove(player);
-        if (player.isOnline()) Bukkit.getScheduler().runTask(plugin, player::updateCommands);
+
+        // Durante onDisable(), o Bukkit já considera o plugin desativado.
+        // Não agendamos tarefas com um plugin desativado.
+        if (plugin.isEnabled() && player.isOnline()) {
+            Bukkit.getScheduler().runTask(plugin, player::updateCommands);
+        }
     }
 
     public synchronized void clearAll() {
