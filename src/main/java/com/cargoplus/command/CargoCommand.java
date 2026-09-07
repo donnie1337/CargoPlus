@@ -98,13 +98,8 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     private boolean color(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) { sender.sendMessage(msg("player-only")); return true; }
         if (!player.hasPermission("cargoplus.cor")) { sender.sendMessage(msg("no-permission")); return true; }
-        if (args.length != 1) { sender.sendMessage(msg("usage-cor")); return true; }
-        String color = args[0].trim().toLowerCase(Locale.ROOT);
-        if (!plugin.chatColors().containsKey(color) || !plugin.setChatColor(player, color)) {
-            sender.sendMessage(msg("invalid-color"));
-            return true;
-        }
-        sender.sendMessage(msg("color-changed").replace("{color}", color));
+        if (args.length != 0) { sender.sendMessage(msg("usage-cor")); return true; }
+        plugin.openChatColorMenu(player);
         return true;
     }
 
@@ -126,7 +121,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (sub.equals("promover") && hasCargoPermission(sender, "cargoplus.promover")) return onlinePlayers(args[1]);
                 if (sub.equals("removercargo") && hasCargoPermission(sender, "cargoplus.removercargo")) return onlinePlayers(args[1]);
                 if (sub.equals("setcargo") && sender instanceof ConsoleCommandSender) return onlinePlayers(args[1]);
-                if (sub.equals("cor") && sender instanceof Player player && player.hasPermission("cargoplus.cor")) return partial(plugin.chatColors().keySet(), args[1]);
                 return List.of();
             }
             if (args.length == 3 && args[0].equalsIgnoreCase("setcargo") && sender instanceof ConsoleCommandSender) return partial(plugin.groups().hierarchy(), args[2]);
@@ -138,10 +132,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             if (!(sender instanceof ConsoleCommandSender)) return List.of();
             if (args.length == 1) return onlinePlayers(args[0]);
             if (args.length == 2) return partial(plugin.groups().hierarchy(), args[1]);
-        }
-        if (commandName.equals("cor")) {
-            if (sender instanceof Player player && player.hasPermission("cargoplus.cor") && args.length == 1) return partial(plugin.chatColors().keySet(), args[0]);
-            return List.of();
         }
         return List.of();
     }
