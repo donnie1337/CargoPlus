@@ -91,13 +91,24 @@ public final class GroupService {
         visiting.remove(name);
     }
 
+    /**
+     * Formata o prefixo usando a cor oficial do cargo, preservando os estilos
+     * configurados no proprio prefixo (por exemplo, &l para negrito).
+     */
     public String prefix(String group) {
         Group g = get(group);
         if (g == null || g.prefix().isBlank()) return "";
+
         String prefix = ChatColor.translateAlternateColorCodes('&', g.prefix());
-        String withoutColor = ChatColor.stripColor(prefix);
+        String withoutColors = stripColorsOnly(prefix);
         ChatColor color = colors.resolve(g.nameColor());
-        return color == null ? withoutColor : color + withoutColor;
+        return color == null ? withoutColors : color + withoutColors;
+    }
+
+    /** Remove somente codigos de cor, preservando estilos como negrito (&l). */
+    private static String stripColorsOnly(String text) {
+        if (text == null || text.isEmpty()) return text;
+        return text.replaceAll("§(?:[0-9a-fA-F]|#[0-9a-fA-F]{6}|x(?:§[0-9a-fA-F]){6})", "");
     }
 
     public String nameColor(String group) {
