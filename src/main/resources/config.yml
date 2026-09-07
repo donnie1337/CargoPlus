@@ -69,7 +69,7 @@ groups:
       - chat.local
       - chat.global
       - chat.staff
-      - cargoplus.cor
+      - sistemautil.cor
       - sistemautil.configurar
     parents:
       - moderador
@@ -81,7 +81,7 @@ groups:
       - chat.local
       - chat.global
       - chat.staff
-      - cargoplus.cor
+      - sistemautil.cor
       - sistemautil.configurar
     parents:
       - administrador
@@ -97,7 +97,7 @@ groups:
       - cargoplus.setcargo
       - cargoplus.removercargo
       - cargoplus.admin
-      - cargoplus.cor
+      - sistemautil.cor
       - sistemautil.plugins
       - sistemautil.configurar
     parents:
