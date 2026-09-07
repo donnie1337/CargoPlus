@@ -123,16 +123,42 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String commandName = command.getName().toLowerCase(Locale.ROOT);
+
+        // Tab completion follows the same authorization rules as command execution.
+        // Console can see all administrative commands; players only see commands
+        // for which their CargoPlus group grants the corresponding permission.
         if (commandName.equals("cargo")) {
-            if (args.length == 1) return partial(List.of("promover", "setcargo", "removercargo", "reload"), args[0]);
-            if (args.length == 2 && List.of("promover", "removercargo", "setcargo").contains(args[0].toLowerCase(Locale.ROOT))) return onlinePlayers(args[1]);
-            if (args.length == 3 && args[0].equalsIgnoreCase("setcargo")) return partial(plugin.groups().hierarchy(), args[2]);
+            if (args.length == 1) {
+                List<String> available = new ArrayList<>();
+                if (hasCargoPermission(sender, "cargoplus.promover")) available.add("promover");
+                if (sender instanceof ConsoleCommandSender) available.add("setcargo");
+                if (hasCargoPermission(sender, "cargoplus.removercargo")) available.add("removercargo");
+                if (hasCargoPermission(sender, "cargoplus.admin")) available.add("reload");
+                return partial(available, args[0]);
+            }
+            if (args.length == 2) {
+                String sub = args[0].toLowerCase(Locale.ROOT);
+                if (sub.equals("promover") && hasCargoPermission(sender, "cargoplus.promover")) return onlinePlayers(args[1]);
+                if (sub.equals("removercargo") && hasCargoPermission(sender, "cargoplus.removercargo")) return onlinePlayers(args[1]);
+                if (sub.equals("setcargo") && sender instanceof ConsoleCommandSender) return onlinePlayers(args[1]);
+                return List.of();
+            }
+            if (args.length == 3 && args[0].equalsIgnoreCase("setcargo") && sender instanceof ConsoleCommandSender) {
+                return partial(plugin.groups().hierarchy(), args[2]);
+            }
             return List.of();
         }
-        if (commandName.equals("promover") || commandName.equals("removercargo")) return args.length == 1 ? onlinePlayers(args[0]) : List.of();
+
+        if (commandName.equals("promover")) {
+            return hasCargoPermission(sender, "cargoplus.promover") && args.length == 1
+                    ? onlinePlayers(args[0]) : List.of();
+        }
+        if (commandName.equals("removercargo")) {
+            return hasCargoPermission(sender, "cargoplus.removercargo") && args.length == 1
+                    ? onlinePlayers(args[0]) : List.of();
+        }
         if (commandName.equals("setcargo")) {
-            // Não expõe sugestões de /setcargo para jogadores; somente o console deve utilizá-lo.
-            if (sender instanceof Player) return List.of();
+            if (!(sender instanceof ConsoleCommandSender)) return List.of();
             if (args.length == 1) return onlinePlayers(args[0]);
             if (args.length == 2) return partial(plugin.groups().hierarchy(), args[1]);
         }
