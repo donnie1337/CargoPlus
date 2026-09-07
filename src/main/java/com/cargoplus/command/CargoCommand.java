@@ -77,6 +77,10 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean setCargo(CommandSender sender, String[] args) {
+        if (sender instanceof Player player && !player.isOp()) {
+            sender.sendMessage(msg("no-permission"));
+            return true;
+        }
         if (!hasCargoPermission(sender, "cargoplus.setcargo")) { sender.sendMessage(msg("no-permission")); return true; }
         if (args.length != 2) { sender.sendMessage(msg("usage-setcargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
