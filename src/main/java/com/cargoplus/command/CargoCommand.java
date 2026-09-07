@@ -11,7 +11,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     private final CargoPlus plugin;
 
     public CargoCommand(CargoPlus plugin) { this.plugin = plugin; }
-
     private String msg(String key) { return plugin.message(key); }
 
     @Override
@@ -58,30 +57,16 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (plugin.groups().indexOf(current) < 0) { sender.sendMessage(msg("invalid-group")); return true; }
         String next = plugin.groups().next(current);
         if (next == null) { sender.sendMessage(msg("already-top")); return true; }
-
         var nextGroup = plugin.groups().get(next);
         plugin.setGroup(target, next);
-
-        String promotedMessage = msg("promotion-title")
-                .replace("{player}", target.getName())
-                .replace("{group}", nextGroup.displayName());
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            if (plugin.isAuthenticated(online)) {
-                online.sendTitle(promotedMessage, "", 10, 70, 20);
-            }
-        }
-
-        sender.sendMessage(msg("promoted")
-                .replace("{player}", target.getName())
-                .replace("{group}", nextGroup.displayName()));
+        String promotedMessage = msg("promotion-title").replace("{player}", target.getName()).replace("{group}", nextGroup.displayName());
+        for (Player online : Bukkit.getOnlinePlayers()) if (plugin.isAuthenticated(online)) online.sendTitle(promotedMessage, "", 10, 70, 20);
+        sender.sendMessage(msg("promoted").replace("{player}", target.getName()).replace("{group}", nextGroup.displayName()));
         return true;
     }
 
     private boolean setCargo(CommandSender sender, String[] args) {
-        if (sender instanceof Player) {
-            sender.sendMessage(msg("no-permission"));
-            return true;
-        }
+        if (sender instanceof Player) { sender.sendMessage(msg("no-permission")); return true; }
         if (args.length != 2) { sender.sendMessage(msg("usage-setcargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
@@ -97,48 +82,25 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (args.length != 1) { sender.sendMessage(msg("usage-removercargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
-
         if (sender instanceof Player player) {
-            if (player.getUniqueId().equals(target.getUniqueId())) {
-                sender.sendMessage(msg("cannot-remove-self"));
-                return true;
-            }
-
+            if (player.getUniqueId().equals(target.getUniqueId())) { sender.sendMessage(msg("cannot-remove-self")); return true; }
             String executorGroup = plugin.permissions().getGroup(player.getUniqueId());
             String targetGroup = plugin.permissions().getGroup(target.getUniqueId());
             int executorRank = plugin.groups().indexOf(executorGroup);
             int targetRank = plugin.groups().indexOf(targetGroup);
-
-            if (executorRank < 0 || targetRank < 0 || targetRank >= executorRank) {
-                sender.sendMessage(msg("cannot-remove-higher"));
-                return true;
-            }
+            if (executorRank < 0 || targetRank < 0 || targetRank >= executorRank) { sender.sendMessage(msg("cannot-remove-higher")); return true; }
         }
-
         plugin.setGroup(target, plugin.groups().defaultGroup());
         sender.sendMessage(msg("removed").replace("{player}", target.getName()));
         return true;
     }
 
     private boolean color(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(msg("player-only"));
-            return true;
-        }
-        if (!player.hasPermission("cargoplus.cor")) {
-            sender.sendMessage(msg("no-permission"));
-            return true;
-        }
-        if (args.length != 1) {
-            sender.sendMessage(msg("usage-cor"));
-            return true;
-        }
+        if (!(sender instanceof Player player)) { sender.sendMessage(msg("player-only")); return true; }
+        if (!player.hasPermission("cargoplus.cor")) { sender.sendMessage(msg("no-permission")); return true; }
+        if (args.length != 1) { sender.sendMessage(msg("usage-cor")); return true; }
         String color = args[0].trim().toLowerCase(Locale.ROOT);
-        if (!plugin.nicknameColors().containsKey(color)) {
-            sender.sendMessage(msg("invalid-color"));
-            return true;
-        }
-        if (!plugin.setNicknameColor(player, color)) {
+        if (!plugin.chatColors().containsKey(color) || !plugin.setChatColor(player, color)) {
             sender.sendMessage(msg("invalid-color"));
             return true;
         }
@@ -149,7 +111,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String commandName = command.getName().toLowerCase(Locale.ROOT);
-
         if (commandName.equals("cargo")) {
             if (args.length == 1) {
                 List<String> available = new ArrayList<>();
@@ -165,32 +126,21 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (sub.equals("promover") && hasCargoPermission(sender, "cargoplus.promover")) return onlinePlayers(args[1]);
                 if (sub.equals("removercargo") && hasCargoPermission(sender, "cargoplus.removercargo")) return onlinePlayers(args[1]);
                 if (sub.equals("setcargo") && sender instanceof ConsoleCommandSender) return onlinePlayers(args[1]);
-                if (sub.equals("cor") && sender instanceof Player player && player.hasPermission("cargoplus.cor")) return partial(plugin.nicknameColors().keySet(), args[1]);
+                if (sub.equals("cor") && sender instanceof Player player && player.hasPermission("cargoplus.cor")) return partial(plugin.chatColors().keySet(), args[1]);
                 return List.of();
             }
-            if (args.length == 3 && args[0].equalsIgnoreCase("setcargo") && sender instanceof ConsoleCommandSender) {
-                return partial(plugin.groups().hierarchy(), args[2]);
-            }
+            if (args.length == 3 && args[0].equalsIgnoreCase("setcargo") && sender instanceof ConsoleCommandSender) return partial(plugin.groups().hierarchy(), args[2]);
             return List.of();
         }
-
-        if (commandName.equals("promover")) {
-            return hasCargoPermission(sender, "cargoplus.promover") && args.length == 1
-                    ? onlinePlayers(args[0]) : List.of();
-        }
-        if (commandName.equals("removercargo")) {
-            return hasCargoPermission(sender, "cargoplus.removercargo") && args.length == 1
-                    ? onlinePlayers(args[0]) : List.of();
-        }
+        if (commandName.equals("promover")) return hasCargoPermission(sender, "cargoplus.promover") && args.length == 1 ? onlinePlayers(args[0]) : List.of();
+        if (commandName.equals("removercargo")) return hasCargoPermission(sender, "cargoplus.removercargo") && args.length == 1 ? onlinePlayers(args[0]) : List.of();
         if (commandName.equals("setcargo")) {
             if (!(sender instanceof ConsoleCommandSender)) return List.of();
             if (args.length == 1) return onlinePlayers(args[0]);
             if (args.length == 2) return partial(plugin.groups().hierarchy(), args[1]);
         }
         if (commandName.equals("cor")) {
-            if (sender instanceof Player player && player.hasPermission("cargoplus.cor") && args.length == 1) {
-                return partial(plugin.nicknameColors().keySet(), args[0]);
-            }
+            if (sender instanceof Player player && player.hasPermission("cargoplus.cor") && args.length == 1) return partial(plugin.chatColors().keySet(), args[0]);
             return List.of();
         }
         return List.of();
