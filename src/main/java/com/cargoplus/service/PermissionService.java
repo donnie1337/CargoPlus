@@ -38,11 +38,17 @@ public final class PermissionService {
     public String getGroup(UUID uuid) { return getUser(uuid).group(); }
     public String getPrefix(UUID uuid) { return groups.prefix(getGroup(uuid)); }
     public String getNicknameColor(UUID uuid) { return nicknameColors.resolveColor(getUser(uuid), groups).toString(); }
+
     public String getChatColor(UUID uuid) {
         String color = getUser(uuid).chatColor();
         ChatColor resolved = chatColors.resolve(color);
-        return resolved == null ? chatColors.resolve(chatColors.defaultColor()).toString() : resolved.toString();
+        if (resolved != null) return resolved.toString();
+        ChatColor fallback = chatColors.resolve(chatColors.defaultColor());
+        return fallback == null ? ChatColor.WHITE.toString() : fallback.toString();
     }
+
+    public Map<String, String> getChatColors() { return chatColors.allowedColors(); }
+    public String getDefaultChatColor() { return chatColors.defaultColor(); }
 
     public boolean hasPermission(UUID uuid, String permission) {
         if (permission == null || permission.isBlank() || permission.length() > 128) return false;
@@ -57,9 +63,19 @@ public final class PermissionService {
     }
 
     public synchronized boolean setChatColor(Player player, String color) {
-        if (player == null || color == null || color.isBlank() || !chatColors.isAllowed(color)) return false;
-        UserData current = getUser(player.getUniqueId());
-        storage.put(new UserData(player.getUniqueId(), player.getName(), current.group(), color));
+        return player != null && setChatColor(player.getUniqueId(), color, player.getName());
+    }
+
+    public synchronized boolean setChatColor(UUID uuid, String color) {
+        Player player = plugin.getServer().getPlayer(uuid);
+        return setChatColor(uuid, color, player == null ? "" : player.getName());
+    }
+
+    private boolean setChatColor(UUID uuid, String color, String playerName) {
+        if (uuid == null || color == null || color.isBlank() || !chatColors.isAllowed(color)) return false;
+        UserData current = getUser(uuid);
+        String normalized = color.trim().toLowerCase(java.util.Locale.ROOT);
+        storage.put(new UserData(uuid, playerName, current.group(), normalized));
         return true;
     }
 
