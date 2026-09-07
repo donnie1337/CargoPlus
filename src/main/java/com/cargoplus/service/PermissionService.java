@@ -59,6 +59,20 @@ public final class PermissionService {
 
     public String getDefaultChatColor() { return chatColors.defaultColor(); }
 
+    /**
+     * Consulta exclusivamente as permissões que o CargoPlus atribui pelo cargo.
+     * Permissões concedidas por OP ou por outros plugins não criam autorização
+     * para comandos protegidos pelo CargoPlus.
+     */
+    public boolean hasCargoPermission(UUID uuid, String permission) {
+        if (uuid == null || permission == null || permission.isBlank() || permission.length() > 128) return false;
+        Player player = plugin.getServer().getPlayer(uuid);
+        if (player == null || !player.isOnline()) return false;
+        UserData user = getUser(uuid);
+        if (!player.isOp() && !isAuthenticated(player)) return false;
+        return groups.resolvePermissions(user.group()).contains(normalizePermission(permission));
+    }
+
     public boolean hasPermission(UUID uuid, String permission) {
         if (permission == null || permission.isBlank() || permission.length() > 128) return false;
         Player player = plugin.getServer().getPlayer(uuid);
@@ -115,5 +129,21 @@ public final class PermissionService {
 
     public synchronized void clearAll() {
         for (Player player : plugin.getServer().getOnlinePlayers()) remove(player);
+    }
+
+    private String normalizePermission(String permission) {
+        return permission.trim().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    private boolean isAuthenticated(Player player) {
+        try {
+            var method = player.getServer().getPluginManager().getPlugin("AuthSystem");
+            if (method == null || !method.isEnabled()) return false;
+            var isAuthenticated = method.getClass().getMethod("isAuthenticated", Player.class);
+            Object result = isAuthenticated.invoke(method, player);
+            return result instanceof Boolean && (Boolean) result;
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            return false;
+        }
     }
 }
