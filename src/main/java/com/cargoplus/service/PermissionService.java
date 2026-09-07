@@ -67,8 +67,9 @@ public final class PermissionService {
     }
 
     public synchronized boolean setChatColor(UUID uuid, String color) {
-        Player player = plugin.getServer().getPlayer(uuid);
-        return setChatColor(uuid, color, player == null ? "" : player.getName());
+        if (uuid == null) return false;
+        UserData current = getUser(uuid);
+        return setChatColor(uuid, color, current.name());
     }
 
     private boolean setChatColor(UUID uuid, String color, String playerName) {
