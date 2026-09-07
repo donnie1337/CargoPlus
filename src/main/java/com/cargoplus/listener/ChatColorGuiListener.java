@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -51,30 +50,25 @@ public final class ChatColorGuiListener implements Listener {
         player.openInventory(inventory);
     }
 
-    private boolean isColorMenu(InventoryClickEvent event) {
-        return TITLE.equals(event.getView().getTitle());
-    }
-
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (!isColorMenu(event)) return;
+        if (!TITLE.equals(event.getView().getTitle())) return;
 
-        // O inventário inteiro funciona como um menu: nenhuma operação de
-        // movimentação de itens é permitida, inclusive shift-click, hotbar,
-        // duplo clique e cliques com qualquer botão.
+        // O GUI é somente um menu de seleção. Nenhuma movimentação de item
+        // é permitida: pegar, colocar, shift-click, hotbar, duplo clique etc.
         event.setCancelled(true);
 
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        // Não permita colocar um item do cursor no menu. Como o evento é
-        // cancelado, o item permanece com o jogador e não entra no GUI.
+        // Se o jogador tentar colocar um item que está no cursor em um slot
+        // do menu, o evento permanece cancelado e o item continua no cursor,
+        // portanto ele nunca é transferido para o GUI nem consumido.
         if (event.getClickedInventory() == event.getView().getTopInventory()
                 && event.getCursor() != null
                 && !event.getCursor().getType().isAir()) {
             return;
         }
 
-        // Shift-click/hotbar/double-click também ficam bloqueados pelo cancelamento.
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType().isAir() || !clicked.hasItemMeta()) return;
         ItemMeta meta = clicked.getItemMeta();
@@ -90,27 +84,8 @@ public final class ChatColorGuiListener implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         if (!TITLE.equals(event.getView().getTitle())) return;
-        // Impede qualquer item do cursor de ser colocado em qualquer slot do menu.
+        // Bloqueia completamente o arraste de itens para o menu.
         event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        if (!TITLE.equals(event.getView().getTitle())) return;
-
-        // Segurança adicional: se algum item conseguir chegar ao inventário do
-        // menu por uma interação externa, devolve-o imediatamente ao jogador.
-        Player player = (Player) event.getPlayer();
-        Inventory top = event.getView().getTopInventory();
-        List<ItemStack> configuredItems = new ArrayList<>(top.getSize());
-        for (ItemStack item : top.getContents()) {
-            if (item != null && !item.getType().isAir()) configuredItems.add(item.clone());
-        }
-        for (ItemStack item : configuredItems) {
-            top.removeItem(item);
-            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(item);
-            leftovers.values().forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
-        }
     }
 
     private static ChatColor parse(String value) {
