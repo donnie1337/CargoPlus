@@ -60,6 +60,21 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (plugin.groups().indexOf(current) < 0) { sender.sendMessage(msg("invalid-group")); return true; }
         String next = plugin.groups().next(current);
         if (next == null) { sender.sendMessage(msg("already-top")); return true; }
+
+        if (sender instanceof Player player) {
+            if (player.getUniqueId().equals(target.getUniqueId())) {
+                sender.sendMessage(msg("no-permission"));
+                return true;
+            }
+            String executorGroup = plugin.permissions().getGroup(player.getUniqueId());
+            int executorRank = plugin.groups().indexOf(executorGroup);
+            int targetRank = plugin.groups().indexOf(current);
+            if (executorRank < 0 || targetRank < 0 || targetRank >= executorRank) {
+                sender.sendMessage(msg("no-permission"));
+                return true;
+            }
+        }
+
         var nextGroup = plugin.groups().get(next);
         plugin.setGroup(target, next);
         String promotedMessage = msg("promotion-title").replace("{player}", target.getName()).replace("{group}", nextGroup.displayName());
