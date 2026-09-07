@@ -42,7 +42,10 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean reload(CommandSender sender) {
-        if (!hasCargoPermission(sender, "cargoplus.admin")) { sender.sendMessage(msg("no-permission")); return true; }
+        if (sender instanceof Player) {
+            sender.sendMessage(msg("no-permission"));
+            return true;
+        }
         plugin.reloadPlugin(sender);
         return true;
     }
@@ -103,7 +106,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (hasCargoPermission(sender, "cargoplus.promover")) available.add("promover");
                 if (sender instanceof ConsoleCommandSender) available.add("setcargo");
                 if (hasCargoPermission(sender, "cargoplus.removercargo")) available.add("removercargo");
-                if (hasCargoPermission(sender, "cargoplus.admin")) available.add("reload");
+                if (sender instanceof ConsoleCommandSender) available.add("reload");
                 return partial(available, args[0]);
             }
             if (args.length == 2) {
