@@ -23,8 +23,9 @@ chat:
     aqua: "&3"
     preto: "&0"
 
-# A cor do nickname é definida exclusivamente pelo cargo.
-# Ela será usada no chat e futuramente no TAB.
+# A cor do cargo é definida em name-color.
+# Essa mesma cor é aplicada ao prefixo/cargo, nickname e futuramente ao TAB.
+# Não existe uma cor separada para o nickname.
 hierarchy:
   - membro
   - ajudante
@@ -43,7 +44,7 @@ groups:
     parents: []
   ajudante:
     display-name: "Ajudante"
-    prefix: "&7[Ajudante] "
+    prefix: "&e[Ajudante] "
     name-color: "amarelo"
     permissions:
       - chat.local
