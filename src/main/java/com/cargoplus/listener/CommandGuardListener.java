@@ -17,12 +17,12 @@ import java.util.Iterator;
 import java.util.Locale;
 
 /**
- * Camada central de seguranca dos comandos executados por jogadores.
+ * Camada central de segurança dos comandos executados por jogadores.
  *
- * O console nunca passa por estes eventos e continua podendo executar tudo.
- * Jogadores so podem executar comandos que possuam uma permissao Bukkit
- * registrada e que eles realmente tenham. Comandos sem permissao explicita
- * sao negados por padrao.
+ * O console não passa por estes eventos e continua podendo executar comandos.
+ * Para comandos do CargoPlus, a autorização vem exclusivamente do cargo
+ * configurado no próprio CargoPlus. Para comandos de outros plugins, a
+ * permissão Bukkit continua sendo respeitada normalmente.
  */
 public final class CommandGuardListener implements Listener {
     private final CargoPlus plugin;
@@ -40,10 +40,16 @@ public final class CommandGuardListener implements Listener {
         String label = normalize(parts[0]);
         Command command = findCommand(label);
 
-        // Reload do servidor e dos plugins e sempre exclusivo do console.
         if (isServerReload(label) || isPluginReload(label, parts, command)) {
             deny(player);
             event.setCancelled(true);
+            return;
+        }
+
+        if (isCargoPlusCommand(label)) {
+            // O CargoCommand faz a validação detalhada de cada subcomando.
+            // O guard não deve impedir esses comandos por não terem permission:
+            // no plugin.yml, assim o console continua funcionando.
             return;
         }
 
@@ -73,6 +79,11 @@ public final class CommandGuardListener implements Listener {
                 continue;
             }
 
+            if (isCargoPlusCommand(label)) {
+                if (!canSeeCargoPlusCommand(player, label)) iterator.remove();
+                continue;
+            }
+
             Command command = findCommand(label);
             if (command == null) {
                 iterator.remove();
@@ -86,6 +97,25 @@ public final class CommandGuardListener implements Listener {
         }
     }
 
+    private boolean isCargoPlusCommand(String label) {
+        String normalized = baseLabel(label);
+        return switch (normalized) {
+            case "promover", "setcargo", "removercargo", "cargo", "cargoplus" -> true;
+            default -> false;
+        };
+    }
+
+    private boolean canSeeCargoPlusCommand(Player player, String label) {
+        if (!plugin.isAuthenticated(player)) return false;
+        return switch (baseLabel(label)) {
+            case "promover" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.promover");
+            case "removercargo" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.removercargo");
+            case "cargo", "cargoplus" -> plugin.permissions().hasCargoPermission(player.getUniqueId(), "cargoplus.admin");
+            case "setcargo" -> false; // console-only
+            default -> false;
+        };
+    }
+
     private boolean isServerReload(String label) {
         return switch (label) {
             case "reload", "rl", "bukkit:reload", "spigot:reload", "paper:reload", "minecraft:reload" -> true;
@@ -95,15 +125,22 @@ public final class CommandGuardListener implements Listener {
 
     private boolean isPluginReload(String label, String[] parts, Command command) {
         if (parts.length < 2 || !parts[1].equalsIgnoreCase("reload") || command == null) return false;
-        String permission = command.getPermission();
-        if (permission == null || permission.isBlank()) return false;
-        String normalizedPermission = permission.toLowerCase(Locale.ROOT);
+        String normalizedPermission = command.getPermission();
+        if (normalizedPermission == null || normalizedPermission.isBlank()) return false;
+        normalizedPermission = normalizedPermission.toLowerCase(Locale.ROOT);
         return normalizedPermission.contains("admin") || normalizedPermission.contains("reload");
     }
 
     private String normalize(String value) {
         String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
         if (normalized.startsWith("/")) normalized = normalized.substring(1);
+        return normalized;
+    }
+
+    private String baseLabel(String label) {
+        String normalized = normalize(label);
+        int separator = normalized.indexOf(':');
+        if (separator >= 0 && separator + 1 < normalized.length()) return normalized.substring(separator + 1);
         return normalized;
     }
 
