@@ -26,6 +26,7 @@ public final class GroupService {
                         name,
                         section.getString(rawName + ".display-name", name),
                         section.getString(rawName + ".prefix", ""),
+                        normalizeColorName(section.getString(rawName + ".name-color", "branco")),
                         normalizePermissions(section.getStringList(rawName + ".permissions")),
                         normalizeGroups(section.getStringList(rawName + ".parents"))));
             }
@@ -34,6 +35,11 @@ public final class GroupService {
     }
 
     private static String normalize(String value) { return value == null ? "" : value.trim().toLowerCase(Locale.ROOT); }
+
+    private static String normalizeColorName(String value) {
+        String normalized = normalize(value);
+        return normalized.isBlank() ? "branco" : normalized;
+    }
 
     private static boolean isSafeGroupName(String value) { return value.matches("[a-z0-9_-]{1,32}"); }
 
@@ -82,5 +88,10 @@ public final class GroupService {
     public String prefix(String group) {
         Group g = get(group);
         return g == null ? "" : ChatColor.translateAlternateColorCodes('&', g.prefix());
+    }
+
+    public String nameColor(String group) {
+        Group g = get(group);
+        return g == null ? "branco" : g.nameColor();
     }
 }
