@@ -36,7 +36,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             case "promover" -> promote(sender, args);
             case "setcargo" -> setCargo(sender, args);
             case "removercargo" -> removeCargo(sender, args);
-            case "cor" -> color(sender, args);
             case "reload" -> reload(sender);
             default -> { sender.sendMessage(msg("usage")); yield true; }
         };
@@ -95,14 +94,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean color(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) { sender.sendMessage(msg("player-only")); return true; }
-        if (!player.hasPermission("cargoplus.cor")) { sender.sendMessage(msg("no-permission")); return true; }
-        if (args.length != 0) { sender.sendMessage(msg("usage-cor")); return true; }
-        plugin.openChatColorMenu(player);
-        return true;
-    }
-
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String commandName = command.getName().toLowerCase(Locale.ROOT);
@@ -113,7 +104,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (sender instanceof ConsoleCommandSender) available.add("setcargo");
                 if (hasCargoPermission(sender, "cargoplus.removercargo")) available.add("removercargo");
                 if (hasCargoPermission(sender, "cargoplus.admin")) available.add("reload");
-                if (sender instanceof Player && sender.hasPermission("cargoplus.cor")) available.add("cor");
                 return partial(available, args[0]);
             }
             if (args.length == 2) {
