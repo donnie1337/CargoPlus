@@ -2,6 +2,7 @@ package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
 import com.cargoplus.storage.Storage;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -115,6 +116,7 @@ public final class PermissionService {
         for (String permission : groups.resolvePermissions(user.group())) attachment.setPermission(permission, true);
         attachments.put(player.getUniqueId(), attachment);
         nicknameColors.apply(player, user, groups);
+        player.updateCommands();
     }
 
     public synchronized void remove(Player player) {
@@ -122,6 +124,7 @@ public final class PermissionService {
         PermissionAttachment old = attachments.remove(player.getUniqueId());
         if (old != null) player.removeAttachment(old);
         nicknameColors.remove(player);
+        if (player.isOnline()) Bukkit.getScheduler().runTask(plugin, player::updateCommands);
     }
 
     public synchronized void clearAll() {
