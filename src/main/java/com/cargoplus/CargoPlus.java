@@ -135,7 +135,7 @@ public final class CargoPlus extends JavaPlugin {
 
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
-        Plugin auth = getServer().getPluginManager().getPlugin("AuthSystem");
+        Plugin auth = getServer().getPluginManager().getPlugin("LoginPlus");
         if (auth == null || !auth.isEnabled()) return false;
         try {
             Method method = auth.getClass().getMethod("isAuthenticated", Player.class);
