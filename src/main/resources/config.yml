@@ -3,10 +3,9 @@ storage:
 
 default-group: membro
 
-# Cores disponíveis para o nickname.
-# Os nomes abaixo podem ser usados no /cor <cor>.
-# O código deve ser uma cor simples do Minecraft.
-nickname:
+# Cores que podem ser escolhidas para o texto enviado pelo jogador.
+# Estas cores NÃO alteram a cor do nickname nem a cor do cargo.
+chat:
   default-color: branco
   colors:
     branco: "&f"
@@ -18,14 +17,13 @@ nickname:
     azul-claro: "&b"
     amarelo: "&e"
     dourado: "&6"
-    laranja: "&6"
     rosa: "&d"
     roxo: "&5"
     aqua: "&3"
     preto: "&0"
 
-# Os cargos e a ordem de promoção são definidos aqui.
-# Para criar ou renomear cargos, altere somente este arquivo.
+# A cor do nickname é definida exclusivamente pelo cargo.
+# Ela será usada no chat e futuramente no TAB.
 hierarchy:
   - membro
   - ajudante
