@@ -90,11 +90,11 @@ groups:
       - chat.local
       - chat.global
       - chat.staff
-      - chat.admin
       - cargoplus.promover
       - cargoplus.setcargo
       - cargoplus.removercargo
       - cargoplus.admin
       - cargoplus.cor
+      - sistemautil.plugins
     parents:
       - gerente
