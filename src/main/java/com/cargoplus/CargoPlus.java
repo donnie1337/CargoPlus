@@ -2,6 +2,7 @@ package com.cargoplus;
 
 import com.cargoplus.api.CargoPlusAPI;
 import com.cargoplus.command.CargoCommand;
+import com.cargoplus.listener.ChatColorGuiListener;
 import com.cargoplus.listener.PlayerListener;
 import com.cargoplus.model.UserData;
 import com.cargoplus.service.CargoPlusColorConfig;
@@ -30,6 +31,7 @@ public final class CargoPlus extends JavaPlugin {
     private Map<String, String> messages;
     private NicknameColorService nicknameColors;
     private CargoPlusColorConfig chatColors;
+    private ChatColorGuiListener chatColorGui;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "CargoPlus-Save");
         thread.setDaemon(true);
@@ -53,6 +55,7 @@ public final class CargoPlus extends JavaPlugin {
             nicknameColors = loadedNicknameColors;
             permissions = new PermissionService(this, storage, groups, nicknameColors, chatColors);
             api = new CargoPlusAPI(permissions, groups);
+            chatColorGui = new ChatColorGuiListener(this);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
             getServer().getPluginManager().disablePlugin(this);
@@ -61,6 +64,7 @@ public final class CargoPlus extends JavaPlugin {
 
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        getServer().getPluginManager().registerEvents(chatColorGui, this);
         registerApi();
         for (Player player : getServer().getOnlinePlayers()) {
             permissions.remove(player);
@@ -148,6 +152,7 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     public Map<String, String> chatColors() { return chatColors.allowedColors(); }
+    public void openChatColorMenu(Player player) { if (chatColorGui != null) chatColorGui.open(player); }
 
     public String getChatColor(Player player) {
         return player == null ? "" : permissions.getChatColor(player.getUniqueId());
@@ -164,6 +169,7 @@ public final class CargoPlus extends JavaPlugin {
             NicknameColorService newNicknameColors = new NicknameColorService(newChatColors);
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
+            ChatColorGuiListener newGui = new ChatColorGuiListener(this);
 
             PermissionService oldPermissions = permissions;
             groups = newGroups;
@@ -172,6 +178,7 @@ public final class CargoPlus extends JavaPlugin {
             nicknameColors = newNicknameColors;
             permissions = newPermissions;
             api = newApi;
+            chatColorGui = newGui;
 
             if (oldPermissions != null) oldPermissions.clearAll();
             for (Player player : getServer().getOnlinePlayers()) {
