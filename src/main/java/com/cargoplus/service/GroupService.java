@@ -10,8 +10,14 @@ public final class GroupService {
     private final Map<String, Group> groups = new LinkedHashMap<>();
     private final List<String> hierarchy = new ArrayList<>();
     private final String defaultGroup;
+    private final CargoPlusColorConfig colors;
 
     public GroupService(FileConfiguration config) {
+        this(config, new CargoPlusColorConfig(config));
+    }
+
+    public GroupService(FileConfiguration config, CargoPlusColorConfig colors) {
+        this.colors = colors;
         this.defaultGroup = normalize(config.getString("default-group", "membro"));
         for (String name : config.getStringList("hierarchy")) {
             String normalized = normalize(name);
@@ -87,7 +93,11 @@ public final class GroupService {
 
     public String prefix(String group) {
         Group g = get(group);
-        return g == null ? "" : ChatColor.translateAlternateColorCodes('&', g.prefix());
+        if (g == null || g.prefix().isBlank()) return "";
+        String prefix = ChatColor.translateAlternateColorCodes('&', g.prefix());
+        String withoutColor = ChatColor.stripColor(prefix);
+        ChatColor color = colors.resolve(g.nameColor());
+        return color == null ? withoutColor : color + withoutColor;
     }
 
     public String nameColor(String group) {
