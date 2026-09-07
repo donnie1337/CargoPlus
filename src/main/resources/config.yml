@@ -11,6 +11,7 @@ chat:
     branco: "&f"
     cinza: "&7"
     vermelho: "&c"
+    vermelho-escuro: "&4"
     verde: "&a"
     verde-escuro: "&2"
     azul: "&9"
@@ -43,7 +44,7 @@ groups:
   ajudante:
     display-name: "Ajudante"
     prefix: "&7[Ajudante] "
-    name-color: "cinza"
+    name-color: "amarelo"
     permissions:
       - chat.local
       - chat.staff
@@ -83,7 +84,7 @@ groups:
   dono:
     display-name: "Dono"
     prefix: "&4[Dono] "
-    name-color: "roxo"
+    name-color: "vermelho-escuro"
     permissions:
       - chat.local
       - chat.global
