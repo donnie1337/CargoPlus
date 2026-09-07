@@ -48,6 +48,7 @@ groups:
     permissions:
       - chat.local
       - chat.staff
+      - sistemautil.configurar
     parents:
       - membro
   moderador:
@@ -57,6 +58,7 @@ groups:
     permissions:
       - chat.local
       - chat.staff
+      - sistemautil.configurar
     parents:
       - ajudante
   administrador:
@@ -68,6 +70,7 @@ groups:
       - chat.global
       - chat.staff
       - cargoplus.cor
+      - sistemautil.configurar
     parents:
       - moderador
   gerente:
@@ -79,6 +82,7 @@ groups:
       - chat.global
       - chat.staff
       - cargoplus.cor
+      - sistemautil.configurar
     parents:
       - administrador
   dono:
@@ -95,5 +99,6 @@ groups:
       - cargoplus.admin
       - cargoplus.cor
       - sistemautil.plugins
+      - sistemautil.configurar
     parents:
       - gerente
