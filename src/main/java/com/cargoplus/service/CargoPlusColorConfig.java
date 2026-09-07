@@ -3,6 +3,7 @@ package com.cargoplus.service;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +27,7 @@ public final class CargoPlusColorConfig {
     }
 
     public String defaultColor() { return defaultColor; }
-    public Map<String, String> allowedColors() { return Map.copyOf(colors); }
+    public Map<String, String> allowedColors() { return Collections.unmodifiableMap(new LinkedHashMap<>(colors)); }
     public boolean isAllowed(String name) { return name != null && colors.containsKey(normalize(name)); }
 
     public ChatColor resolve(String name) {
