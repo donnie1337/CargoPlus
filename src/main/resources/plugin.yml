@@ -24,6 +24,7 @@ commands:
     usage: /cargo <promover|setcargo|removercargo|reload>
     aliases:
       - cargoplus
+    permission: cargoplus.admin
 permissions:
   cargoplus.promover:
     description: Permite promover jogadores dentro da hierarquia configurada.
@@ -38,5 +39,5 @@ permissions:
     description: Permite escolher a cor do próprio texto no chat.
     default: false
   cargoplus.admin:
-    description: Permite recarregar o CargoPlus e administrar o comando principal.
+    description: Permite administrar o CargoPlus. Reload é exclusivo do console.
     default: false
