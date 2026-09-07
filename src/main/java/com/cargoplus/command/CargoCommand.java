@@ -37,6 +37,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             case "promover" -> promote(sender, args);
             case "setcargo" -> setCargo(sender, args);
             case "removercargo" -> removeCargo(sender, args);
+            case "cor" -> color(sender, args);
             case "reload" -> reload(sender);
             default -> { sender.sendMessage(msg("usage")); yield true; }
         };
@@ -77,7 +78,6 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean setCargo(CommandSender sender, String[] args) {
-        // /setcargo é exclusivamente administrativo e só pode ser executado pelo console.
         if (sender instanceof Player) {
             sender.sendMessage(msg("no-permission"));
             return true;
@@ -120,13 +120,36 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean color(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(msg("player-only"));
+            return true;
+        }
+        if (!player.hasPermission("cargoplus.cor")) {
+            sender.sendMessage(msg("no-permission"));
+            return true;
+        }
+        if (args.length != 1) {
+            sender.sendMessage(msg("usage-cor"));
+            return true;
+        }
+        String color = args[0].trim().toLowerCase(Locale.ROOT);
+        if (!plugin.nicknameColors().containsKey(color)) {
+            sender.sendMessage(msg("invalid-color"));
+            return true;
+        }
+        if (!plugin.setNicknameColor(player, color)) {
+            sender.sendMessage(msg("invalid-color"));
+            return true;
+        }
+        sender.sendMessage(msg("color-changed").replace("{color}", color));
+        return true;
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String commandName = command.getName().toLowerCase(Locale.ROOT);
 
-        // Tab completion follows the same authorization rules as command execution.
-        // Console can see all administrative commands; players only see commands
-        // for which their CargoPlus group grants the corresponding permission.
         if (commandName.equals("cargo")) {
             if (args.length == 1) {
                 List<String> available = new ArrayList<>();
@@ -134,6 +157,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (sender instanceof ConsoleCommandSender) available.add("setcargo");
                 if (hasCargoPermission(sender, "cargoplus.removercargo")) available.add("removercargo");
                 if (hasCargoPermission(sender, "cargoplus.admin")) available.add("reload");
+                if (sender instanceof Player && sender.hasPermission("cargoplus.cor")) available.add("cor");
                 return partial(available, args[0]);
             }
             if (args.length == 2) {
@@ -141,6 +165,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
                 if (sub.equals("promover") && hasCargoPermission(sender, "cargoplus.promover")) return onlinePlayers(args[1]);
                 if (sub.equals("removercargo") && hasCargoPermission(sender, "cargoplus.removercargo")) return onlinePlayers(args[1]);
                 if (sub.equals("setcargo") && sender instanceof ConsoleCommandSender) return onlinePlayers(args[1]);
+                if (sub.equals("cor") && sender instanceof Player player && player.hasPermission("cargoplus.cor")) return partial(plugin.nicknameColors().keySet(), args[1]);
                 return List.of();
             }
             if (args.length == 3 && args[0].equalsIgnoreCase("setcargo") && sender instanceof ConsoleCommandSender) {
@@ -161,6 +186,12 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
             if (!(sender instanceof ConsoleCommandSender)) return List.of();
             if (args.length == 1) return onlinePlayers(args[0]);
             if (args.length == 2) return partial(plugin.groups().hierarchy(), args[1]);
+        }
+        if (commandName.equals("cor")) {
+            if (sender instanceof Player player && player.hasPermission("cargoplus.cor") && args.length == 1) {
+                return partial(plugin.nicknameColors().keySet(), args[0]);
+            }
+            return List.of();
         }
         return List.of();
     }
