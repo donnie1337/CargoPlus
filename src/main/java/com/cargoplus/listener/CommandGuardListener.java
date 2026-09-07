@@ -17,12 +17,12 @@ import java.util.Iterator;
 import java.util.Locale;
 
 /**
- * Camada central de segurança dos comandos executados por jogadores.
+ * Camada central de seguranca dos comandos executados por jogadores.
  *
  * O console nunca passa por estes eventos e continua podendo executar tudo.
- * Jogadores só podem executar comandos que possuam uma permissão Bukkit
- * registrada e que eles realmente tenham. Comandos sem permissão explícita
- * são negados por padrão.
+ * Jogadores so podem executar comandos que possuam uma permissao Bukkit
+ * registrada e que eles realmente tenham. Comandos sem permissao explicita
+ * sao negados por padrao.
  */
 public final class CommandGuardListener implements Listener {
     private final CargoPlus plugin;
@@ -38,15 +38,15 @@ public final class CommandGuardListener implements Listener {
         if (parts.length == 0) return;
 
         String label = normalize(parts[0]);
+        Command command = findCommand(label);
 
-        // Reload de qualquer plugin/servidor é exclusivamente do console.
-        if (label.equals("reload") || containsReloadArgument(parts)) {
+        // Reload do servidor e dos plugins e sempre exclusivo do console.
+        if (isServerReload(label) || isPluginReload(label, parts, command)) {
             deny(player);
             event.setCancelled(true);
             return;
         }
 
-        Command command = findCommand(label);
         if (command == null) {
             deny(player);
             event.setCancelled(true);
@@ -68,7 +68,7 @@ public final class CommandGuardListener implements Listener {
 
         while (iterator.hasNext()) {
             String label = normalize(iterator.next());
-            if (label.equals("reload")) {
+            if (isServerReload(label)) {
                 iterator.remove();
                 continue;
             }
@@ -86,11 +86,19 @@ public final class CommandGuardListener implements Listener {
         }
     }
 
-    private boolean containsReloadArgument(String[] parts) {
-        for (int i = 1; i < parts.length; i++) {
-            if (parts[i].equalsIgnoreCase("reload")) return true;
-        }
-        return false;
+    private boolean isServerReload(String label) {
+        return switch (label) {
+            case "reload", "rl", "bukkit:reload", "spigot:reload", "paper:reload", "minecraft:reload" -> true;
+            default -> false;
+        };
+    }
+
+    private boolean isPluginReload(String label, String[] parts, Command command) {
+        if (parts.length < 2 || !parts[1].equalsIgnoreCase("reload") || command == null) return false;
+        String permission = command.getPermission();
+        if (permission == null || permission.isBlank()) return false;
+        String normalizedPermission = permission.toLowerCase(Locale.ROOT);
+        return normalizedPermission.contains("admin") || normalizedPermission.contains("reload");
     }
 
     private String normalize(String value) {
@@ -114,7 +122,7 @@ public final class CommandGuardListener implements Listener {
                 return commandMap.getCommand(normalized.substring(separator + 1));
             }
         } catch (ReflectiveOperationException | LinkageError ex) {
-            plugin.getLogger().warning("Não foi possível consultar o mapa de comandos: " + ex.getMessage());
+            plugin.getLogger().warning("Nao foi possivel consultar o mapa de comandos: " + ex.getMessage());
         }
         return null;
     }
