@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.permissions.PermissionAttachment;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,15 @@ public final class PermissionService {
         return fallback == null ? ChatColor.WHITE.toString() : fallback.toString();
     }
 
-    public Map<String, String> getChatColors() { return chatColors.allowedColors(); }
+    public Map<String, String> getChatColors() {
+        Map<String, String> result = new LinkedHashMap<>();
+        for (String name : chatColors.allowedColors().keySet()) {
+            ChatColor color = chatColors.resolve(name);
+            if (color != null) result.put(name, color.toString());
+        }
+        return result;
+    }
+
     public String getDefaultChatColor() { return chatColors.defaultColor(); }
 
     public boolean hasPermission(UUID uuid, String permission) {
