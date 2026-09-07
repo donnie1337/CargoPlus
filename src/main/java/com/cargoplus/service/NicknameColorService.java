@@ -27,13 +27,14 @@ public final class NicknameColorService {
         return colors.isAllowed(groupColor) ? groupColor : colors.defaultColor();
     }
 
+    public ChatColor resolveColor(UserData user, GroupService groups) {
+        ChatColor color = colors.resolve(colorName(user, groups));
+        return color == null ? ChatColor.WHITE : color;
+    }
+
     public void apply(Player player, UserData user, GroupService groups) {
         if (player == null || !player.isOnline()) return;
-        String colorName = colorName(user, groups);
-        ChatColor color = colors.resolve(colorName);
-        if (color == null) color = colors.resolve(colors.defaultColor());
-        if (color == null) color = ChatColor.WHITE;
-
+        ChatColor color = resolveColor(user, groups);
         player.setDisplayName(color + player.getName());
         player.setPlayerListName(color + player.getName());
         applyTeam(player, color);
