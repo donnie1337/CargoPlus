@@ -29,6 +29,7 @@ public final class CargoPlus extends JavaPlugin {
     private CargoPlusAPI api;
     private Map<String, String> messages;
     private NicknameColorService nicknameColors;
+    private CargoPlusColorConfig chatColors;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "CargoPlus-Save");
         thread.setDaemon(true);
@@ -44,12 +45,13 @@ public final class CargoPlus extends JavaPlugin {
             GroupService loadedGroups = new GroupService(getConfig());
             Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             loadedStorage.load();
-            CargoPlusColorConfig colorConfig = new CargoPlusColorConfig(getConfig());
-            NicknameColorService loadedNicknameColors = new NicknameColorService(colorConfig);
+            CargoPlusColorConfig loadedChatColors = new CargoPlusColorConfig(getConfig());
+            NicknameColorService loadedNicknameColors = new NicknameColorService(loadedChatColors);
             groups = loadedGroups;
             storage = loadedStorage;
+            chatColors = loadedChatColors;
             nicknameColors = loadedNicknameColors;
-            permissions = new PermissionService(this, storage, groups, nicknameColors);
+            permissions = new PermissionService(this, storage, groups, nicknameColors, chatColors);
             api = new CargoPlusAPI(permissions, groups);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
@@ -137,15 +139,19 @@ public final class CargoPlus extends JavaPlugin {
         saveAsync();
     }
 
-    public boolean setNicknameColor(Player player, String color) {
+    public boolean setChatColor(Player player, String color) {
         if (!isAuthenticated(player)) return false;
-        if (!permissions.setNicknameColor(player, color)) return false;
+        if (!permissions.setChatColor(player, color)) return false;
         permissions.apply(player, permissions.getUser(player.getUniqueId()));
         saveAsync();
         return true;
     }
 
-    public Map<String, String> nicknameColors() { return nicknameColors.allowedColors(); }
+    public Map<String, String> chatColors() { return chatColors.allowedColors(); }
+
+    public String getChatColor(Player player) {
+        return player == null ? "" : permissions.getChatColor(player.getUniqueId());
+    }
 
     public synchronized void reloadPlugin(CommandSender sender) {
         try {
@@ -154,13 +160,15 @@ public final class CargoPlus extends JavaPlugin {
             GroupService newGroups = new GroupService(getConfig());
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
-            NicknameColorService newNicknameColors = new NicknameColorService(new CargoPlusColorConfig(getConfig()));
-            PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors);
+            CargoPlusColorConfig newChatColors = new CargoPlusColorConfig(getConfig());
+            NicknameColorService newNicknameColors = new NicknameColorService(newChatColors);
+            PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
 
             PermissionService oldPermissions = permissions;
             groups = newGroups;
             storage = newStorage;
+            chatColors = newChatColors;
             nicknameColors = newNicknameColors;
             permissions = newPermissions;
             api = newApi;
