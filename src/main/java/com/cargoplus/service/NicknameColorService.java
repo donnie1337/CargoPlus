@@ -57,8 +57,10 @@ public final class NicknameColorService {
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
         team.setColor(color);
+        team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.addEntry(player.getName());
         teams.put(player.getUniqueId(), teamName);
+        player.setCollidable(false);
     }
 
     public Map<String, String> allowedColors() { return colors.allowedColors(); }
