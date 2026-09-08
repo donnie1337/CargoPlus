@@ -2,6 +2,7 @@ package com.cargoplus.listener;
 
 import com.cargoplus.CargoPlus;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +27,7 @@ public final class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        event.setJoinMessage(null);
         plugin.permissions().remove(player);
         scheduleAuthenticationCheck(player);
     }
@@ -40,6 +42,7 @@ public final class PlayerListener implements Listener {
             }
             if (plugin.isAuthenticated(player)) {
                 plugin.ensureUser(player);
+                sendJoinMessage(player);
                 cancelPending(uuid);
             }
         }, 1L, AUTH_CHECK_INTERVAL_TICKS);
@@ -58,6 +61,48 @@ public final class PlayerListener implements Listener {
         }, timeoutTicks);
     }
 
+    private void sendJoinMessage(Player player) {
+        if (!plugin.getConfig().getBoolean("mensagens-entrada-saida.ativado", true)) return;
+        String group = plugin.permissions().getGroup(player.getUniqueId());
+        String message = getCargoMessage(group, "entrada");
+        if (message == null) return;
+        Bukkit.broadcastMessage(formatMessage(player, group, message));
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        event.setQuitMessage(null);
+        Player player = event.getPlayer();
+        String group = plugin.permissions().getGroup(player.getUniqueId());
+        String message = getCargoMessage(group, "saida");
+        if (message != null && plugin.getConfig().getBoolean("mensagens-entrada-saida.ativado", true)) {
+            Bukkit.broadcastMessage(formatMessage(player, group, message));
+        }
+        UUID uuid = player.getUniqueId();
+        cancelPending(uuid);
+        plugin.permissions().remove(player);
+    }
+
+    private String getCargoMessage(String group, String type) {
+        if (group == null || group.isBlank()) return null;
+        String path = "mensagens-entrada-saida.cargos." + group + "." + type;
+        if (!plugin.getConfig().getBoolean(path + ".ativado", false)) return null;
+        String message = plugin.getConfig().getString(path + ".mensagem", "");
+        return message == null || message.isBlank() ? null : message;
+    }
+
+    private String formatMessage(Player player, String group, String message) {
+        String prefix = plugin.permissions().getPrefix(player.getUniqueId());
+        String nicknameColor = plugin.permissions().getNicknameColor(player.getUniqueId());
+        String result = message
+                .replace("%player%", player.getName())
+                .replace("%nome%", player.getName())
+                .replace("%cargo%", group)
+                .replace("%prefix%", prefix == null ? "" : prefix)
+                .replace("%nome-color%", nicknameColor == null ? "" : nicknameColor);
+        return ChatColor.translateAlternateColorCodes('&', result);
+    }
+
     private int getAuthenticationTimeoutSeconds() {
         Plugin auth = Bukkit.getPluginManager().getPlugin("LoginPlus");
         if (auth instanceof JavaPlugin javaPlugin && auth.isEnabled()) {
@@ -68,13 +113,6 @@ public final class PlayerListener implements Listener {
 
     private boolean isAuthSystemAvailable() {
         return Bukkit.getPluginManager().isPluginEnabled("LoginPlus");
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-        cancelPending(uuid);
-        plugin.permissions().remove(event.getPlayer());
     }
 
     private void cancelPending(UUID uuid) {
