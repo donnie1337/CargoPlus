@@ -54,7 +54,7 @@ public final class CargoPlus extends JavaPlugin {
             storage = loadedStorage;
             chatColors = loadedChatColors;
             nicknameColors = loadedNicknameColors;
-            permissions = new PermissionService(this, storage, groups, nicknameColors, chatColors);
+            permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedChatColors);
             api = new CargoPlusAPI(permissions, groups);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
@@ -132,6 +132,22 @@ public final class CargoPlus extends JavaPlugin {
     public GroupService groups() { return groups; }
     public PermissionService permissions() { return permissions; }
     public CargoPlusAPI api() { return api; }
+
+    public boolean isJoinMessageEnabled(String group) {
+        return group != null && getConfig().getBoolean("mensagens-entrada." + group + ".ativado", false);
+    }
+
+    public boolean isQuitMessageEnabled(String group) {
+        return group != null && getConfig().getBoolean("mensagens-saida." + group + ".ativado", false);
+    }
+
+    public String getJoinMessage(String group) {
+        return getConfig().getString("mensagens-entrada." + group + ".mensagem", "");
+    }
+
+    public String getQuitMessage(String group) {
+        return getConfig().getString("mensagens-saida." + group + ".mensagem", "");
+    }
 
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
