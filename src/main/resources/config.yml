@@ -39,16 +39,15 @@ groups:
     prefix: ""
     name-color: "branco"
     permissions:
-      - chat.local
+      - chatplus.local
     parents: []
   ajudante:
     display-name: "Ajudante"
     prefix: "&e[Ajudante] "
     name-color: "amarelo"
     permissions:
-      - chat.local
-      - chat.staff
-      - sistemautil.configurar
+      - chatplus.local
+      - chatplus.staff
     parents:
       - membro
   moderador:
@@ -56,9 +55,8 @@ groups:
     prefix: "&2[Moderador] "
     name-color: "verde-escuro"
     permissions:
-      - chat.local
-      - chat.staff
-      - sistemautil.configurar
+      - chatplus.local
+      - chatplus.staff
     parents:
       - ajudante
   administrador:
@@ -66,11 +64,9 @@ groups:
     prefix: "&c[ADM] "
     name-color: "vermelho"
     permissions:
-      - chat.local
-      - chat.global
-      - chat.staff
-      - sistemautil.cor
-      - sistemautil.configurar
+      - chatplus.local
+      - chatplus.global
+      - chatplus.staff
     parents:
       - moderador
   gerente:
@@ -78,11 +74,9 @@ groups:
     prefix: "&6[Gerente] "
     name-color: "dourado"
     permissions:
-      - chat.local
-      - chat.global
-      - chat.staff
-      - sistemautil.cor
-      - sistemautil.configurar
+      - chatplus.local
+      - chatplus.global
+      - chatplus.staff
     parents:
       - administrador
   dono:
@@ -90,15 +84,15 @@ groups:
     prefix: "&4[Dono] "
     name-color: "vermelho-escuro"
     permissions:
-      - chat.local
-      - chat.global
-      - chat.staff
+      - chatplus.local
+      - chatplus.global
+      - chatplus.staff
       - cargoplus.promover
       - cargoplus.setcargo
       - cargoplus.removercargo
       - cargoplus.admin
       - chatplus.cor
-      - sistemautil.plugins
+      - utilidadesplus.plugins
       - utilidadesplus.configurar
     parents:
       - gerente
