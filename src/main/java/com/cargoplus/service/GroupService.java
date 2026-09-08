@@ -5,10 +5,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class GroupService {
     private final Map<String, Group> groups = new LinkedHashMap<>();
     private final List<String> hierarchy = new ArrayList<>();
+    private final Map<String, Set<String>> permissionCache = new ConcurrentHashMap<>();
     private final String defaultGroup;
     private final CargoPlusColorConfig colors;
 
@@ -76,9 +78,13 @@ public final class GroupService {
     }
 
     public Set<String> resolvePermissions(String group) {
-        Set<String> result = new LinkedHashSet<>();
-        resolve(group, result, new HashSet<>());
-        return result;
+        String normalized = normalize(group);
+        if (normalized.isBlank()) return Set.of();
+        return permissionCache.computeIfAbsent(normalized, key -> {
+            Set<String> result = new LinkedHashSet<>();
+            resolve(key, result, new HashSet<>());
+            return Set.copyOf(result);
+        });
     }
 
     private void resolve(String name, Set<String> result, Set<String> visiting) {
@@ -91,10 +97,7 @@ public final class GroupService {
         visiting.remove(name);
     }
 
-    /**
-     * Formata o prefixo usando a cor oficial do cargo, preservando os estilos
-     * configurados no proprio prefixo (por exemplo, &l para negrito).
-     */
+    /** Formata o prefixo usando a cor oficial do cargo, preservando os estilos configurados. */
     public String prefix(String group) {
         Group g = get(group);
         if (g == null || g.prefix().isBlank()) return "";
