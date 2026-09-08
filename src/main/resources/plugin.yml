@@ -31,9 +31,6 @@ permissions:
   cargoplus.removercargo:
     description: Permite remover o cargo de jogadores.
     default: false
-  cargoplus.cor:
-    description: Permite escolher a cor do próprio texto no chat.
-    default: false
   cargoplus.admin:
     description: Permite administrar o CargoPlus. Reload é exclusivo do console.
     default: false
