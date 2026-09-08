@@ -11,51 +11,51 @@ mensagens-entrada:
   membro:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
   ajudante:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
   moderador:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
   administrador:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
   gerente:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
   dono:
     ativado: true
     mensagens:
-      - "%cargo% %player% olha quem apareceu!"
-      - "%cargo% %player% acabou de chegar!"
-      - "%cargo% %player% está entre nós!"
-      - "%cargo% %player% chegou chegando!"
-      - "%cargo% %player% deu as caras por aqui!"
+      - "[%cargo%] %player% olha quem apareceu!"
+      - "[%cargo%] %player% acabou de chegar!"
+      - "[%cargo%] %player% está entre nós!"
+      - "[%cargo%] %player% chegou chegando!"
+      - "[%cargo%] %player% deu as caras por aqui!"
 
 # Mensagens de saída por cargo.
 # O mesmo sistema pode ser ativado/desativado e personalizado separadamente da entrada.
