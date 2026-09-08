@@ -3,6 +3,51 @@ storage:
 
 default-group: membro
 
+# Mensagens de entrada por cargo.
+# Somente os cargos com ativado: true exibem uma mensagem quando um jogador desse cargo entra.
+# Placeholders: %player% = nome do jogador | %cargo% = nome exibido do cargo.
+mensagens-entrada:
+  membro:
+    ativado: true
+    mensagem: "&8[&a+&8] &f%player% &7entrou no servidor!"
+  ajudante:
+    ativado: true
+    mensagem: "&8[&a+&8] &e[Ajudante] &f%player% &7entrou no servidor!"
+  moderador:
+    ativado: true
+    mensagem: "&8[&a+&8] &2[Moderador] &f%player% &7entrou no servidor!"
+  administrador:
+    ativado: true
+    mensagem: "&8[&a+&8] &c[ADM] &f%player% &7entrou no servidor!"
+  gerente:
+    ativado: true
+    mensagem: "&8[&a+&8] &6[Gerente] &f%player% &7entrou no servidor!"
+  dono:
+    ativado: true
+    mensagem: "&8[&a+&8] &4[Dono] &f%player% &7entrou no servidor!"
+
+# Mensagens de saída por cargo.
+# O mesmo sistema pode ser ativado/desativado e personalizado separadamente da entrada.
+mensagens-saida:
+  membro:
+    ativado: false
+    mensagem: "&8[&c-&8] &f%player% &7saiu do servidor!"
+  ajudante:
+    ativado: false
+    mensagem: "&8[&c-&8] &e[Ajudante] &f%player% &7saiu do servidor!"
+  moderador:
+    ativado: false
+    mensagem: "&8[&c-&8] &2[Moderador] &f%player% &7saiu do servidor!"
+  administrador:
+    ativado: false
+    mensagem: "&8[&c-&8] &c[ADM] &f%player% &7saiu do servidor!"
+  gerente:
+    ativado: false
+    mensagem: "&8[&c-&8] &6[Gerente] &f%player% &7saiu do servidor!"
+  dono:
+    ativado: false
+    mensagem: "&8[&c-&8] &4[Dono] &f%player% &7saiu do servidor!"
+
 # Cores que podem ser escolhidas para o texto enviado pelo jogador.
 # Estas cores NÃO alteram a cor do nickname nem a cor do cargo.
 chat:
