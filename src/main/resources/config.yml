@@ -5,26 +5,57 @@ default-group: membro
 
 # Mensagens de entrada por cargo.
 # Somente os cargos com ativado: true exibem uma mensagem quando um jogador desse cargo entra.
+# As 5 frases abaixo são escolhidas aleatoriamente para cada entrada.
 # Placeholders: %player% = nome do jogador | %cargo% = nome exibido do cargo.
 mensagens-entrada:
   membro:
     ativado: true
-    mensagem: "&8[&a+&8] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
   ajudante:
     ativado: true
-    mensagem: "&8[&a+&8] &e[Ajudante] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
   moderador:
     ativado: true
-    mensagem: "&8[&a+&8] &2[Moderador] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
   administrador:
     ativado: true
-    mensagem: "&8[&a+&8] &c[ADM] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
   gerente:
     ativado: true
-    mensagem: "&8[&a+&8] &6[Gerente] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
   dono:
     ativado: true
-    mensagem: "&8[&a+&8] &4[Dono] &f%player% &7entrou no servidor!"
+    mensagens:
+      - "%cargo% %player% olha quem apareceu!"
+      - "%cargo% %player% acabou de chegar!"
+      - "%cargo% %player% está entre nós!"
+      - "%cargo% %player% chegou chegando!"
+      - "%cargo% %player% deu as caras por aqui!"
 
 # Mensagens de saída por cargo.
 # O mesmo sistema pode ser ativado/desativado e personalizado separadamente da entrada.
