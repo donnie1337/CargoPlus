@@ -9,7 +9,7 @@ default-group: membro
 # Placeholders: %player% = nome do jogador | %cargo% = nome exibido do cargo.
 mensagens-entrada:
   membro:
-    ativado: true
+    ativado: false
     mensagens:
       - "[%cargo%] %player% olha quem apareceu!"
       - "[%cargo%] %player% acabou de chegar!"
