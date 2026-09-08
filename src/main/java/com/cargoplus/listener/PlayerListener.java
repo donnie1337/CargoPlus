@@ -59,7 +59,7 @@ public final class PlayerListener implements Listener {
     }
 
     private int getAuthenticationTimeoutSeconds() {
-        Plugin auth = Bukkit.getPluginManager().getPlugin("AuthSystem");
+        Plugin auth = Bukkit.getPluginManager().getPlugin("LoginPlus");
         if (auth instanceof JavaPlugin javaPlugin && auth.isEnabled()) {
             return Math.max(1, javaPlugin.getConfig().getInt("tempo-limite-login-segundos", DEFAULT_AUTH_TIMEOUT_SECONDS));
         }
@@ -67,7 +67,7 @@ public final class PlayerListener implements Listener {
     }
 
     private boolean isAuthSystemAvailable() {
-        return Bukkit.getPluginManager().isPluginEnabled("AuthSystem");
+        return Bukkit.getPluginManager().isPluginEnabled("LoginPlus");
     }
 
     @EventHandler
