@@ -97,8 +97,8 @@ groups:
       - cargoplus.setcargo
       - cargoplus.removercargo
       - cargoplus.admin
-      - sistemautil.cor
+      - chatplus.cor
       - sistemautil.plugins
-      - sistemautil.configurar
+      - utilidadesplus.configurar
     parents:
       - gerente
