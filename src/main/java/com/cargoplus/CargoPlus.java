@@ -149,6 +149,11 @@ public final class CargoPlus extends JavaPlugin {
         return getConfig().getString("mensagens-saida." + group + ".mensagem", "");
     }
 
+    public String getCargoDisplayName(String group) {
+        if (group == null || groups == null || groups.get(group) == null) return group == null ? "" : group;
+        return groups.get(group).displayName();
+    }
+
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
         Plugin auth = getServer().getPluginManager().getPlugin("LoginPlus");
