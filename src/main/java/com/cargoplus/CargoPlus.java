@@ -20,9 +20,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public final class CargoPlus extends JavaPlugin {
@@ -142,7 +144,10 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     public String getJoinMessage(String group) {
-        return getConfig().getString("mensagens-entrada." + group + ".mensagem", "");
+        if (group == null) return "";
+        List<String> configured = getConfig().getStringList("mensagens-entrada." + group + ".mensagens");
+        if (configured.isEmpty()) return "";
+        return configured.get(ThreadLocalRandom.current().nextInt(configured.size()));
     }
 
     public String getQuitMessage(String group) {
@@ -152,6 +157,12 @@ public final class CargoPlus extends JavaPlugin {
     public String getCargoDisplayName(String group) {
         if (group == null || groups == null || groups.get(group) == null) return group == null ? "" : group;
         return groups.get(group).displayName();
+    }
+
+    public String getCargoColor(String group) {
+        if (group == null || groups == null || chatColors == null) return ChatColor.WHITE.toString();
+        ChatColor color = chatColors.resolve(groups.nameColor(group));
+        return color == null ? ChatColor.WHITE.toString() : color.toString();
     }
 
     public boolean isAuthenticated(Player player) {
