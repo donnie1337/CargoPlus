@@ -16,20 +16,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 
-/**
- * Camada central de segurança dos comandos executados por jogadores.
- *
- * O console não passa por estes eventos e continua podendo executar comandos.
- * Para comandos do CargoPlus, a autorização vem exclusivamente do cargo
- * configurado no próprio CargoPlus. Para comandos integrados ao CargoPlus,
- * como o /configurar do SistemaUtil, a permission é consultada diretamente
- * no sistema de cargos, sem depender do PermissionAttachment do Bukkit.
- */
+/** Camada central de segurança dos comandos executados por jogadores. */
 public final class CommandGuardListener implements Listener {
     private final CargoPlus plugin;
+    private volatile Method commandMapMethod;
 
     public CommandGuardListener(CargoPlus plugin) {
         this.plugin = plugin;
+        this.commandMapMethod = resolveCommandMapMethod();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -48,15 +42,10 @@ public final class CommandGuardListener implements Listener {
         }
 
         if (isCargoPlusCommand(label)) return;
-
-        // Comandos não encontrados no CommandMap pertencem a outro plugin,
-        // a um alias dinâmico ou ao servidor. Deixamos o mecanismo normal do
-        // Bukkit decidir, evitando bloquear comandos legítimos por engano.
         if (command == null) return;
 
         String permission = command.getPermission();
         if (permission == null || permission.isBlank()) return;
-
         if (isCargoManagedPermission(player, permission)) return;
 
         if (!player.hasPermission(permission)) {
@@ -77,23 +66,16 @@ public final class CommandGuardListener implements Listener {
                 iterator.remove();
                 continue;
             }
-
             if (isCargoPlusCommand(label)) {
                 if (!canSeeCargoPlusCommand(player, label)) iterator.remove();
                 continue;
             }
 
             Command command = findCommand(label);
-            if (command == null) {
-                // Não removemos comandos de outros plugins/aliases dinâmicos.
-                continue;
-            }
-
+            if (command == null) continue;
             String permission = command.getPermission();
             if (permission == null || permission.isBlank()) continue;
-
             if (isCargoManagedPermission(player, permission)) continue;
-
             if (!player.hasPermission(permission)) iterator.remove();
         }
     }
@@ -104,8 +86,7 @@ public final class CommandGuardListener implements Listener {
     }
 
     private boolean isCargoPlusCommand(String label) {
-        String normalized = baseLabel(label);
-        return switch (normalized) {
+        return switch (baseLabel(label)) {
             case "promover", "setcargo", "removercargo", "cargo", "cargoplus" -> true;
             default -> false;
         };
@@ -152,25 +133,38 @@ public final class CommandGuardListener implements Listener {
 
     private Command findCommand(String label) {
         String normalized = normalize(label);
-        try {
-            Method getCommandMap = Bukkit.getServer().getClass().getMethod("getCommandMap");
-            Object result = getCommandMap.invoke(Bukkit.getServer());
-            if (!(result instanceof CommandMap commandMap)) return null;
+        CommandMap commandMap = getCommandMap();
+        if (commandMap == null) return null;
+        Command command = commandMap.getCommand(normalized);
+        if (command != null) return command;
 
-            Command command = commandMap.getCommand(normalized);
-            if (command != null) return command;
-
-            int separator = normalized.indexOf(':');
-            if (separator >= 0 && separator + 1 < normalized.length()) {
-                return commandMap.getCommand(normalized.substring(separator + 1));
-            }
-        } catch (ReflectiveOperationException | LinkageError ex) {
-            plugin.getLogger().warning("Nao foi possivel consultar o mapa de comandos: " + ex.getMessage());
-        }
+        int separator = normalized.indexOf(':');
+        if (separator >= 0 && separator + 1 < normalized.length()) return commandMap.getCommand(normalized.substring(separator + 1));
         return null;
     }
 
-    private void deny(Player player) {
-        player.sendMessage(plugin.message("no-permission"));
+    private CommandMap getCommandMap() {
+        Method method = commandMapMethod;
+        if (method == null) {
+            method = resolveCommandMapMethod();
+            commandMapMethod = method;
+        }
+        if (method == null) return null;
+        try {
+            Object result = method.invoke(Bukkit.getServer());
+            return result instanceof CommandMap map ? map : null;
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            return null;
+        }
     }
+
+    private Method resolveCommandMapMethod() {
+        try { return Bukkit.getServer().getClass().getMethod("getCommandMap"); }
+        catch (ReflectiveOperationException | LinkageError ex) {
+            plugin.getLogger().warning("Nao foi possivel preparar o mapa de comandos: " + ex.getMessage());
+            return null;
+        }
+    }
+
+    private void deny(Player player) { player.sendMessage(plugin.message("no-permission")); }
 }
