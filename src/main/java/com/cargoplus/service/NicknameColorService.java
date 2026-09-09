@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class NicknameColorService {
-    private static final String TEAM_PREFIX = "cp_";
+    private static final String TEAM_PREFIX = "cp";
     private final CargoPlusColorConfig colors;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
 
@@ -31,7 +31,7 @@ public final class NicknameColorService {
         ChatColor color = resolveColor(user, groups);
         player.setDisplayName(color + player.getName());
         player.setPlayerListName(color + player.getName());
-        applyTeam(player, color);
+        applyTeam(player, color, user.group(), groups);
     }
 
     public void remove(Player player) {
@@ -49,17 +49,41 @@ public final class NicknameColorService {
         player.setPlayerListName(player.getName());
     }
 
-    private void applyTeam(Player player, ChatColor color) {
+    /**
+     * The client sorts the player list using the scoreboard team name.
+     * Prefixing the team with the hierarchy index makes the TAB order deterministic
+     * even after CargoPlus creates the player's team during authentication.
+     *
+     * CargoPlus hierarchy is ordered from lowest to highest:
+     * membro -> ajudante -> moderador -> administrador -> gerente -> dev.
+     * Therefore the lowest index must sort first: DEV is 00 and MEMBRO is 05.
+     */
+    private void applyTeam(Player player, ChatColor color, String group, GroupService groups) {
         Scoreboard scoreboard = player.getScoreboard();
-        String teamName = TEAM_PREFIX + player.getUniqueId().toString().replace("-", "").substring(0, 13).toLowerCase(Locale.ROOT);
+        int hierarchyIndex = groups.indexOf(group);
+        int sortIndex = hierarchyIndex >= 0 ? hierarchyIndex : 99;
+
+        // Team names are limited to 16 characters. "cp" + 2 digits + 12 UUID chars = 16.
+        String uuidPart = player.getUniqueId().toString().replace("-", "");
+        String teamName = TEAM_PREFIX + String.format(Locale.ROOT, "%02d", sortIndex) + uuidPart.substring(0, 12);
+
+        String previousTeamName = teams.put(player.getUniqueId(), teamName);
         Team current = scoreboard.getEntryTeam(player.getName());
-        if (current != null && !current.getName().equals(teamName)) current.removeEntry(player.getName());
+        if (current != null && !current.getName().equals(teamName)) {
+            current.removeEntry(player.getName());
+            if (current.getEntries().isEmpty()) current.unregister();
+        }
+
+        if (previousTeamName != null && !previousTeamName.equals(teamName)) {
+            Team previous = scoreboard.getTeam(previousTeamName);
+            if (previous != null && previous.getEntries().isEmpty()) previous.unregister();
+        }
+
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
         team.setColor(color);
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.addEntry(player.getName());
-        teams.put(player.getUniqueId(), teamName);
         player.setCollidable(false);
     }
 
