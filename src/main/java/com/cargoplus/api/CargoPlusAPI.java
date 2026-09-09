@@ -23,6 +23,7 @@ public final class CargoPlusAPI {
         return permissions.setChatColor(uuid, color);
     }
     public boolean hasPermission(UUID uuid, String permission) { return permissions.hasPermission(uuid, permission); }
+    public boolean hasCargoPermission(UUID uuid, String permission) { return permissions.hasCargoPermission(uuid, permission); }
     public Map<String, String> getChatColors() { return permissions.getChatColors(); }
     public String getDefaultChatColor() { return permissions.getDefaultChatColor(); }
     public GroupService groups() { return groups; }
