@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +67,7 @@ public final class CargoPlus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new CommandGuardListener(this), this);
         registerApi();
+        protectAdministrativeIdentities();
         for (Player player : getServer().getOnlinePlayers()) {
             permissions.remove(player);
             if (isAuthenticated(player)) ensureUser(player);
@@ -94,6 +96,30 @@ public final class CargoPlus extends JavaPlugin {
     private void registerApi() {
         getServer().getServicesManager().unregisterAll(this);
         getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
+    }
+
+    /** Reserva no LoginPlus os nicknames que possuem o cargo de maior nivel (DEV atualmente). */
+    private void protectAdministrativeIdentities() {
+        if (groups == null || storage == null) return;
+        if (groups.hierarchy().isEmpty()) return;
+        String topGroup = groups.hierarchy().get(groups.hierarchy().size() - 1);
+        for (UserData user : storage.snapshot().values()) {
+            if (user == null || !topGroup.equalsIgnoreCase(user.group())) continue;
+            protectLoginIdentity(user.name(), user.uuid());
+        }
+    }
+
+    /** Integra com o LoginPlus sem criar dependencia de compilacao entre os plugins. */
+    private void protectLoginIdentity(String username, UUID uuid) {
+        if (username == null || username.isBlank() || uuid == null) return;
+        Plugin loginPlus = getServer().getPluginManager().getPlugin("LoginPlus");
+        if (loginPlus == null || !loginPlus.isEnabled()) return;
+        try {
+            Method method = loginPlus.getClass().getMethod("protectIdentity", String.class, UUID.class);
+            method.invoke(loginPlus, username, uuid);
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            getLogger().warning("Nao foi possivel proteger a identidade administrativa " + username + " no LoginPlus: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -174,6 +200,10 @@ public final class CargoPlus extends JavaPlugin {
 
     public void setGroup(Player player, String group) {
         permissions.setGroup(player, group);
+        if (groups != null && !groups.hierarchy().isEmpty()) {
+            String topGroup = groups.hierarchy().get(groups.hierarchy().size() - 1);
+            if (topGroup.equalsIgnoreCase(group)) protectLoginIdentity(player.getName(), player.getUniqueId());
+        }
         if (isAuthenticated(player)) permissions.apply(player, permissions.getUser(player.getUniqueId()));
         else permissions.remove(player);
         saveAsync();
@@ -215,6 +245,7 @@ public final class CargoPlus extends JavaPlugin {
             api = newApi;
 
             if (oldPermissions != null) oldPermissions.clearAll();
+            protectAdministrativeIdentities();
             for (Player player : getServer().getOnlinePlayers()) {
                 permissions.remove(player);
                 if (isAuthenticated(player)) {
