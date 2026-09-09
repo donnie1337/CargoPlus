@@ -81,8 +81,8 @@ groups:
     parents:
       - administrador
   dono:
-    display-name: "Dono"
-    prefix: "&4[Dono] "
+    display-name: "DEV"
+    prefix: "&4[DEV] "
     name-color: "vermelho-escuro"
     permissions:
       - chatplus.local
