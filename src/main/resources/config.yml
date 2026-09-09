@@ -49,6 +49,8 @@ groups:
     permissions:
       - chatplus.local
       - chatplus.staff
+      - chatplus.cor
+      - utilidadesplus.configurar
     parents:
       - membro
   moderador:
@@ -58,6 +60,8 @@ groups:
     permissions:
       - chatplus.local
       - chatplus.staff
+      - chatplus.cor
+      - utilidadesplus.configurar
     parents:
       - ajudante
   administrador:
@@ -68,6 +72,8 @@ groups:
       - chatplus.local
       - chatplus.global
       - chatplus.staff
+      - chatplus.cor
+      - utilidadesplus.configurar
     parents:
       - moderador
   gerente:
@@ -78,6 +84,8 @@ groups:
       - chatplus.local
       - chatplus.global
       - chatplus.staff
+      - chatplus.cor
+      - utilidadesplus.configurar
     parents:
       - administrador
   dev:
