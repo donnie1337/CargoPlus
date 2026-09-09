@@ -82,7 +82,7 @@ groups:
       - administrador
   dev:
     display-name: "DEV"
-    prefix: "<gradient:#8A2BE2:#2196F3>[DEV]</gradient> "
+    prefix: "&l<gradient:#8A2BE2:#2196F3>[DEV]</gradient> "
     name-color: "vermelho-escuro"
     permissions:
       - chatplus.local
