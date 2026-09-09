@@ -31,7 +31,7 @@ hierarchy:
   - moderador
   - administrador
   - gerente
-  - dono
+  - dev
 
 groups:
   membro:
@@ -80,7 +80,7 @@ groups:
       - chatplus.staff
     parents:
       - administrador
-  dono:
+  dev:
     display-name: "DEV"
     prefix: "&4[DEV] "
     name-color: "vermelho-escuro"
