@@ -41,6 +41,7 @@ groups:
     permissions:
       - chatplus.local
       - chatplus.global
+      - essentialsplus.tpa
     parents: []
   ajudante:
     display-name: "Ajudante"
@@ -51,6 +52,7 @@ groups:
       - chatplus.staff
       - chatplus.cor
       - utilidadesplus.configurar
+      - essentialsplus.tpa
     parents:
       - membro
   moderador:
@@ -62,6 +64,7 @@ groups:
       - chatplus.staff
       - chatplus.cor
       - utilidadesplus.configurar
+      - essentialsplus.tpa
     parents:
       - ajudante
   administrador:
@@ -74,6 +77,7 @@ groups:
       - chatplus.staff
       - chatplus.cor
       - utilidadesplus.configurar
+      - essentialsplus.tpa
     parents:
       - moderador
   gerente:
@@ -86,6 +90,7 @@ groups:
       - chatplus.staff
       - chatplus.cor
       - utilidadesplus.configurar
+      - essentialsplus.tpa
     parents:
       - administrador
   dev:
@@ -106,5 +111,6 @@ groups:
       - utilidadesplus.plugins
       - utilidadesplus.configurar
       - utilidadesplus.motd.admin
+      - essentialsplus.tpa
     parents:
       - gerente
