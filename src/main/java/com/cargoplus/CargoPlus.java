@@ -144,6 +144,11 @@ public final class CargoPlus extends JavaPlugin {
         return color == null ? ChatColor.WHITE.toString() : color.toString();
     }
 
+    /** O cargo padrão não exibe mensagem de entrada/saída. */
+    public boolean receivesJoinQuitMessage(String group) {
+        return groups != null && group != null && !groups.defaultGroup().equalsIgnoreCase(group.trim());
+    }
+
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
         Plugin auth = getServer().getPluginManager().getPlugin("LoginPlus");
