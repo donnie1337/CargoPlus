@@ -97,6 +97,7 @@ groups:
       - chatplus.global
       - chatplus.staff
       - chatplus.admin
+      - chatplus.comandos.servidor
       - cargoplus.promover
       - cargoplus.setcargo
       - cargoplus.removercargo
