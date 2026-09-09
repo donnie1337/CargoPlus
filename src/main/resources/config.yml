@@ -44,7 +44,7 @@ groups:
     parents: []
   ajudante:
     display-name: "Ajudante"
-    prefix: "<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
+    prefix: "&l<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
     name-color: "amarelo"
     permissions:
       - chatplus.local
@@ -53,7 +53,7 @@ groups:
       - membro
   moderador:
     display-name: "Moderador"
-    prefix: "<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
+    prefix: "&l<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
     name-color: "verde-escuro"
     permissions:
       - chatplus.local
@@ -62,7 +62,7 @@ groups:
       - ajudante
   administrador:
     display-name: "Administrador"
-    prefix: "<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
+    prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
     name-color: "vermelho"
     permissions:
       - chatplus.local
@@ -72,7 +72,7 @@ groups:
       - moderador
   gerente:
     display-name: "Gerente"
-    prefix: "<gradient:#FFD54F:#FF8F00>[Gerente]</gradient> "
+    prefix: "&l<gradient:#FFD54F:#FF8F00>[Gerente]</gradient> "
     name-color: "dourado"
     permissions:
       - chatplus.local
