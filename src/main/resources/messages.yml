@@ -1,6 +1,7 @@
 no-permission: "&c✖ &fVocê não tem permissão para executar este comando."
 player-only: "&c✖ &fEste comando só pode ser usado por jogadores."
 not-authenticated: "&c✖ &fVocê precisa estar autenticado para executar este comando."
+target-not-authenticated: "&c✖ &fEste jogador precisa estar online e autenticado para receber o cargo."
 usage: "&e➜ &fUso: /promover <jogador> | /setcargo <jogador> <cargo> | /removercargo <jogador> | /cargo reload"
 usage-promover: "&e➜ &fUso: /promover <jogador>"
 usage-setcargo: "&e➜ &fUso: /setcargo <jogador> <cargo>"

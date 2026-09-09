@@ -55,7 +55,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (args.length != 1) { sender.sendMessage(msg("usage-promover")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
-        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("not-authenticated")); return true; }
+        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("target-not-authenticated")); return true; }
         String current = plugin.permissions().getGroup(target.getUniqueId());
         if (plugin.groups().indexOf(current) < 0) { sender.sendMessage(msg("invalid-group")); return true; }
         String next = plugin.groups().next(current);
@@ -88,7 +88,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (args.length != 2) { sender.sendMessage(msg("usage-setcargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
-        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("not-authenticated")); return true; }
+        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("target-not-authenticated")); return true; }
         var group = plugin.groups().get(args[1]);
         if (group == null) { sender.sendMessage(msg("group-not-found")); return true; }
         plugin.setGroup(target, group.name());
@@ -101,7 +101,7 @@ public final class CargoCommand implements CommandExecutor, TabCompleter {
         if (args.length != 1) { sender.sendMessage(msg("usage-removercargo")); return true; }
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) { sender.sendMessage(msg("user-not-found")); return true; }
-        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("not-authenticated")); return true; }
+        if (!plugin.isAuthenticated(target)) { sender.sendMessage(msg("target-not-authenticated")); return true; }
         if (sender instanceof Player player) {
             if (player.getUniqueId().equals(target.getUniqueId())) { sender.sendMessage(msg("cannot-remove-self")); return true; }
             String executorGroup = plugin.permissions().getGroup(player.getUniqueId());
