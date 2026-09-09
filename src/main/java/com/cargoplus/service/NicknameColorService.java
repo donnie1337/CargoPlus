@@ -51,17 +51,17 @@ public final class NicknameColorService {
 
     /**
      * The client sorts the player list using the scoreboard team name.
-     * Prefixing the team with the hierarchy index makes the TAB order deterministic
+     * Prefixing the team with a rank key makes the TAB order deterministic
      * even after CargoPlus creates the player's team during authentication.
      *
      * CargoPlus hierarchy is ordered from lowest to highest:
      * membro -> ajudante -> moderador -> administrador -> gerente -> dev.
-     * Therefore the lowest index must sort first: DEV is 00 and MEMBRO is 05.
+     * We invert that index for sorting so DEV is always above MEMBRO.
      */
     private void applyTeam(Player player, ChatColor color, String group, GroupService groups) {
         Scoreboard scoreboard = player.getScoreboard();
         int hierarchyIndex = groups.indexOf(group);
-        int sortIndex = hierarchyIndex >= 0 ? hierarchyIndex : 99;
+        int sortIndex = hierarchyIndex >= 0 ? groups.hierarchy().size() - 1 - hierarchyIndex : 99;
 
         // Team names are limited to 16 characters. "cp" + 2 digits + 12 UUID chars = 16.
         String uuidPart = player.getUniqueId().toString().replace("-", "");
