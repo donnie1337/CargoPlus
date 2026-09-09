@@ -20,11 +20,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public final class CargoPlus extends JavaPlugin {
@@ -134,25 +132,6 @@ public final class CargoPlus extends JavaPlugin {
     public GroupService groups() { return groups; }
     public PermissionService permissions() { return permissions; }
     public CargoPlusAPI api() { return api; }
-
-    public boolean isJoinMessageEnabled(String group) {
-        return group != null && getConfig().getBoolean("mensagens-entrada." + group + ".ativado", false);
-    }
-
-    public boolean isQuitMessageEnabled(String group) {
-        return group != null && getConfig().getBoolean("mensagens-saida." + group + ".ativado", false);
-    }
-
-    public String getJoinMessage(String group) {
-        if (group == null) return "";
-        List<String> configured = getConfig().getStringList("mensagens-entrada." + group + ".mensagens");
-        if (configured.isEmpty()) return "";
-        return configured.get(ThreadLocalRandom.current().nextInt(configured.size()));
-    }
-
-    public String getQuitMessage(String group) {
-        return getConfig().getString("mensagens-saida." + group + ".mensagem", "");
-    }
 
     public String getCargoDisplayName(String group) {
         if (group == null || groups == null || groups.get(group) == null) return group == null ? "" : group;
