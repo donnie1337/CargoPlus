@@ -35,6 +35,7 @@ public final class CargoPlus extends JavaPlugin {
     private Map<String, String> messages;
     private NicknameColorService nicknameColors;
     private CargoPlusColorConfig chatColors;
+    private PrefixAnimationService prefixAnimation;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "CargoPlus-Save");
         thread.setDaemon(true);
@@ -47,15 +48,16 @@ public final class CargoPlus extends JavaPlugin {
         ensureMessagesFile();
         loadMessages();
         try {
-            GroupService loadedGroups = new GroupService(getConfig());
+            PrefixAnimationService animation = new PrefixAnimationService(getConfig());
+            GroupService loadedGroups = new GroupService(getConfig(), new CargoPlusColorConfig(getConfig()), animation);
             Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             loadedStorage.load();
             CargoPlusColorConfig loadedChatColors = new CargoPlusColorConfig(getConfig());
-            PrefixAnimationService animation = new PrefixAnimationService(getConfig());
             NicknameColorService loadedNicknameColors = new NicknameColorService(loadedChatColors, animation);
             groups = loadedGroups;
             storage = loadedStorage;
             chatColors = loadedChatColors;
+            prefixAnimation = animation;
             nicknameColors = loadedNicknameColors;
             permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedChatColors);
             api = new CargoPlusAPI(permissions, groups);
@@ -80,7 +82,7 @@ public final class CargoPlus extends JavaPlugin {
 
     private void startAnimatedPrefixTask() {
         getServer().getScheduler().runTaskTimer(this, () -> {
-            if (permissions == null || nicknameColors == null || groups == null) return;
+            if (permissions == null || nicknameColors == null || groups == null || prefixAnimation == null) return;
             for (Player player : getServer().getOnlinePlayers()) {
                 if (!isAuthenticated(player)) continue;
                 String group = permissions.getGroup(player.getUniqueId());
@@ -209,11 +211,11 @@ public final class CargoPlus extends JavaPlugin {
             reloadConfig();
             ensureMessagesFile();
             loadMessages();
-            GroupService newGroups = new GroupService(getConfig());
+            PrefixAnimationService newAnimation = new PrefixAnimationService(getConfig());
+            CargoPlusColorConfig newChatColors = new CargoPlusColorConfig(getConfig());
+            GroupService newGroups = new GroupService(getConfig(), newChatColors, newAnimation);
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
-            CargoPlusColorConfig newChatColors = new CargoPlusColorConfig(getConfig());
-            PrefixAnimationService newAnimation = new PrefixAnimationService(getConfig());
             NicknameColorService newNicknameColors = new NicknameColorService(newChatColors, newAnimation);
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
@@ -222,6 +224,7 @@ public final class CargoPlus extends JavaPlugin {
             groups = newGroups;
             storage = newStorage;
             chatColors = newChatColors;
+            prefixAnimation = newAnimation;
             nicknameColors = newNicknameColors;
             permissions = newPermissions;
             api = newApi;
