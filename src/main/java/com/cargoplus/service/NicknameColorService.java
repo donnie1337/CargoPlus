@@ -1,6 +1,7 @@
 package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -15,6 +16,7 @@ public final class NicknameColorService {
     private static final String TEAM_PREFIX = "cp";
     private final CargoPlusColorConfig colors;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
+    private final Map<UUID, Component> preservedSuffixes = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors) {
         this.colors = colors;
@@ -41,6 +43,12 @@ public final class NicknameColorService {
             Scoreboard scoreboard = player.getScoreboard();
             Team team = scoreboard.getTeam(teamName);
             if (team != null) {
+                Component suffix = team.suffix();
+                preservedSuffixes.remove(player.getUniqueId());
+                if (suffix != null && !suffix.equals(Component.empty())) {
+                    preservedSuffixes.put(player.getUniqueId(), suffix);
+                }
+
                 team.removeEntry(player.getName());
                 if (team.getEntries().isEmpty()) team.unregister();
             }
@@ -70,21 +78,40 @@ public final class NicknameColorService {
         String previousTeamName = teams.put(player.getUniqueId(), teamName);
         Team current = scoreboard.getEntryTeam(player.getName());
         if (current != null && !current.getName().equals(teamName)) {
+            preserveSuffix(player, current);
             current.removeEntry(player.getName());
             if (current.getEntries().isEmpty()) current.unregister();
         }
 
         if (previousTeamName != null && !previousTeamName.equals(teamName)) {
             Team previous = scoreboard.getTeam(previousTeamName);
-            if (previous != null && previous.getEntries().isEmpty()) previous.unregister();
+            if (previous != null && previous.getEntries().isEmpty()) {
+                preserveSuffix(player, previous);
+                previous.unregister();
+            }
         }
 
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
         team.setColor(color);
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+
+        Component preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
+        if (preservedSuffix != null) {
+            team.suffix(preservedSuffix);
+        }
+
         team.addEntry(player.getName());
         player.setCollidable(false);
+    }
+
+    private void preserveSuffix(Player player, Team team) {
+        if (player == null || team == null) return;
+        Component suffix = team.suffix();
+        preservedSuffixes.remove(player.getUniqueId());
+        if (suffix != null && !suffix.equals(Component.empty())) {
+            preservedSuffixes.put(player.getUniqueId(), suffix);
+        }
     }
 
     public Map<String, String> allowedColors() { return colors.allowedColors(); }
