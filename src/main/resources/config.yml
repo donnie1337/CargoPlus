@@ -22,6 +22,19 @@ chat:
     roxo: "&5"
     aqua: "&3"
 
+# Animações especiais dos cargos.
+# O DEV mantém o small caps e o gradiente roxo -> azul.
+# A animação apenas faz as letras piscarem em branco e depois volta ao gradiente.
+animacoes:
+  dev:
+    ativado: true
+    intervalo-segundos: 10
+    duracao-branco-letra-ms: 300
+    duracao-normal-letra-ms: 150
+    duracao-branco-total-ms: 250
+    duracao-normal-total-ms: 250
+    piscadas-totais: 3
+
 # A cor do cargo é definida em name-color.
 # Essa mesma cor é aplicada ao prefixo/cargo, nickname e futuramente ao TAB.
 # Não existe uma cor separada para o nickname.
@@ -98,8 +111,8 @@ groups:
     parents:
       - administrador
   dev:
-    display-name: "DEV"
-    prefix: "&l<gradient:#8A2BE2:#2196F3>[DEV]</gradient> "
+    display-name: "ᴅᴇᴠ"
+    prefix: "&l<gradient:#8A2BE2:#2196F3>[ᴅᴇᴠ]</gradient> "
     name-color: "vermelho-escuro"
     permissions:
       - chatplus.local
