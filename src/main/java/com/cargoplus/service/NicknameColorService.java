@@ -17,6 +17,7 @@ public final class NicknameColorService {
     private final CargoPlusColorConfig colors;
     private final PrefixAnimationService prefixAnimation;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
+    private final Map<UUID, String> lastRenderedPrefixes = new ConcurrentHashMap<>();
     private final Map<UUID, Object> preservedSuffixes = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors, PrefixAnimationService prefixAnimation) {
@@ -40,21 +41,29 @@ public final class NicknameColorService {
 
     public void refreshAnimatedPrefix(Player player, String group, GroupService groups) {
         if (player == null || !player.isOnline() || groups == null || group == null) return;
-        Team team = findTeam(player);
         var cargo = groups.get(group);
         if (cargo == null) return;
 
-        String animatedPrefix = prefixAnimation.animate(cargo.prefix(), group);
-        writePrefix(team, animatedPrefix);
+        Team team = ensureTeam(player, resolveColor(groups, group), group, groups);
+        if (team == null) return;
 
-        // TAB already renders the Team prefix. Do not put the prefix into
-        // setPlayerListName(), otherwise the prefix is duplicated/overridden.
-        refreshTabName(player, resolveColor(groups, group));
+        String animatedPrefix = prefixAnimation.animate(cargo.prefix(), group);
+        String safePrefix = animatedPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', animatedPrefix);
+        String previousPrefix = lastRenderedPrefixes.put(player.getUniqueId(), safePrefix);
+
+        // Só envia uma atualização ao cliente quando o frame realmente mudou.
+        // Reescrever o Team a cada 2 ticks fazia a tag do TAB piscar.
+        if (!safePrefix.equals(previousPrefix) || !team.hasEntry(player.getName())) {
+            if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
+            team.setPrefix(safePrefix);
+        }
     }
 
     public void remove(Player player) {
         if (player == null) return;
-        String teamName = teams.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        lastRenderedPrefixes.remove(uuid);
+        String teamName = teams.remove(uuid);
         if (teamName != null) {
             Scoreboard scoreboard = player.getScoreboard();
             Team team = scoreboard.getTeam(teamName);
@@ -69,6 +78,17 @@ public final class NicknameColorService {
     }
 
     private void applyTeam(Player player, ChatColor color, String group, GroupService groups) {
+        Team team = ensureTeam(player, color, group, groups);
+        if (team == null) return;
+        String prefix = prefixAnimation.animate(groups.get(group).prefix(), group);
+        String safePrefix = prefix == null ? "" : ChatColor.translateAlternateColorCodes('&', prefix);
+        lastRenderedPrefixes.put(player.getUniqueId(), safePrefix);
+        team.setPrefix(safePrefix);
+        player.setCollidable(false);
+    }
+
+    private Team ensureTeam(Player player, ChatColor color, String group, GroupService groups) {
+        if (player == null || !player.isOnline() || groups == null || group == null) return null;
         Scoreboard scoreboard = player.getScoreboard();
         int hierarchyIndex = groups.indexOf(group);
         int sortIndex = hierarchyIndex >= 0 ? groups.hierarchy().size() - 1 - hierarchyIndex : 99;
@@ -100,11 +120,8 @@ public final class NicknameColorService {
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
-
-        // The Team prefix is rendered both above the head and in TAB.
-        // Keep setPlayerListName() limited to the player's name/color.
-        writePrefix(team, prefixAnimation.animate(groups.get(group).prefix(), group));
         player.setCollidable(false);
+        return team;
     }
 
     private void refreshTabName(Player player, ChatColor color) {
