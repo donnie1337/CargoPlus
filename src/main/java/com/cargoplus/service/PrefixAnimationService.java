@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Gera a animação do prefixo DEV sem alterar o gradiente configurado. */
+/** Gera a animação do prefixo DEV e sempre converte o gradient para cores legadas RGB. */
 public final class PrefixAnimationService {
     private static final Pattern GRADIENT = Pattern.compile("<gradient:(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6})>(.*?)</gradient>", Pattern.DOTALL);
     private static final String DEV_TEXT = "ᴅᴇᴠ";
@@ -41,9 +41,7 @@ public final class PrefixAnimationService {
     }
 
     public String animate(String prefix, String group) {
-        if (!enabled || group == null || !group.equalsIgnoreCase("dev") || prefix == null || prefix.isBlank()) {
-            return prefix == null ? "" : prefix;
-        }
+        if (prefix == null || prefix.isBlank()) return "";
 
         Matcher matcher = GRADIENT.matcher(prefix);
         if (!matcher.find()) return prefix;
@@ -51,7 +49,12 @@ public final class PrefixAnimationService {
         String startHex = matcher.group(1);
         String endHex = matcher.group(2);
         String content = matcher.group(3);
-        if (!content.contains(DEV_TEXT)) return prefix;
+
+        // Only DEV is animated. Other cargos still have their gradient converted
+        // to a Bukkit-compatible legacy RGB prefix instead of leaking <gradient>.
+        if (!enabled || group == null || !group.equalsIgnoreCase("dev") || !content.contains(DEV_TEXT)) {
+            return buildPrefix(matcher, startHex, endHex, content, -1, false);
+        }
 
         long letterPhase = 3L * (letterWhiteMillis + letterNormalMillis);
         long blinkPhase = 2L * totalBlinks * (totalWhiteMillis + totalNormalMillis);
@@ -59,18 +62,19 @@ public final class PrefixAnimationService {
         long cycleDuration = intervalMillis + animationDuration;
         long phase = Math.floorMod(System.currentTimeMillis(), cycleDuration);
 
-        if (phase < intervalMillis) return prefix;
-        long animationPhase = phase - intervalMillis;
+        // During the idle interval, return the normal gradient — already converted.
+        if (phase < intervalMillis) {
+            return buildPrefix(matcher, startHex, endHex, content, -1, false);
+        }
 
+        long animationPhase = phase - intervalMillis;
         int whiteCharacter = -1;
-        boolean wholeWhite = false;
         long cursor = animationPhase;
 
         for (int index = 0; index < 3; index++) {
             long slot = letterWhiteMillis + letterNormalMillis;
             if (cursor < slot) {
-                whiteCharacter = index;
-                if (cursor >= letterWhiteMillis) whiteCharacter = -1;
+                whiteCharacter = cursor < letterWhiteMillis ? index : -1;
                 return buildPrefix(matcher, startHex, endHex, content, whiteCharacter, false);
             }
             cursor -= slot;
@@ -80,11 +84,11 @@ public final class PrefixAnimationService {
         long blinkIndex = cursor / blinkSlot;
         long blinkOffset = cursor % blinkSlot;
         if (blinkIndex < totalBlinks) {
-            wholeWhite = blinkOffset < totalWhiteMillis;
+            boolean wholeWhite = blinkOffset < totalWhiteMillis;
             return buildPrefix(matcher, startHex, endHex, content, -1, wholeWhite);
         }
 
-        return prefix;
+        return buildPrefix(matcher, startHex, endHex, content, -1, false);
     }
 
     private String buildPrefix(Matcher matcher, String startHex, String endHex, String content, int whiteCharacter, boolean wholeWhite) {
@@ -100,7 +104,7 @@ public final class PrefixAnimationService {
             if (character.equals("\n") || character.equals("\r")) {
                 rendered.append(character);
             } else {
-                boolean white = wholeWhite || isDevLetter(content, offset, character, index, whiteCharacter);
+                boolean white = wholeWhite || isDevLetter(content, offset, character, whiteCharacter);
                 int rgb = white ? 0xFFFFFF : interpolate(start, end, visibleCharacters <= 1 ? 0.0 : (double) index / (visibleCharacters - 1));
                 rendered.append(toLegacyHex(rgb)).append(character);
                 index++;
@@ -112,7 +116,7 @@ public final class PrefixAnimationService {
         return matcher.replaceFirst(Matcher.quoteReplacement(replacement));
     }
 
-    private boolean isDevLetter(String content, int offset, String character, int visibleIndex, int whiteCharacter) {
+    private boolean isDevLetter(String content, int offset, String character, int whiteCharacter) {
         if (whiteCharacter < 0) return false;
         int devIndex = 0;
         for (int currentOffset = 0; currentOffset < content.length();) {
