@@ -103,8 +103,7 @@ public final class NicknameColorService {
     private void preserveSuffix(Player player, Team team) {
         if (player == null || team == null) return;
 
-        preservedSuffixes.remove(player.getUniqueId());
-
+        // Keep the latest suffix instead of clearing it before the new Team exists.
         Object suffix = readPaperSuffix(team);
         if (suffix != null) {
             preservedSuffixes.put(player.getUniqueId(), suffix);
