@@ -1,12 +1,12 @@
 package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
-import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -16,7 +16,7 @@ public final class NicknameColorService {
     private static final String TEAM_PREFIX = "cp";
     private final CargoPlusColorConfig colors;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
-    private final Map<UUID, Component> preservedSuffixes = new ConcurrentHashMap<>();
+    private final Map<UUID, Object> preservedSuffixes = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors) {
         this.colors = colors;
@@ -43,12 +43,7 @@ public final class NicknameColorService {
             Scoreboard scoreboard = player.getScoreboard();
             Team team = scoreboard.getTeam(teamName);
             if (team != null) {
-                Component suffix = team.suffix();
-                preservedSuffixes.remove(player.getUniqueId());
-                if (suffix != null && !suffix.equals(Component.empty())) {
-                    preservedSuffixes.put(player.getUniqueId(), suffix);
-                }
-
+                preserveSuffix(player, team);
                 team.removeEntry(player.getName());
                 if (team.getEntries().isEmpty()) team.unregister();
             }
@@ -96,9 +91,9 @@ public final class NicknameColorService {
         team.setColor(color);
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
 
-        Component preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
+        Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) {
-            team.suffix(preservedSuffix);
+            restoreSuffix(team, preservedSuffix);
         }
 
         team.addEntry(player.getName());
@@ -107,10 +102,53 @@ public final class NicknameColorService {
 
     private void preserveSuffix(Player player, Team team) {
         if (player == null || team == null) return;
-        Component suffix = team.suffix();
+
         preservedSuffixes.remove(player.getUniqueId());
-        if (suffix != null && !suffix.equals(Component.empty())) {
+
+        Object suffix = readPaperSuffix(team);
+        if (suffix != null) {
             preservedSuffixes.put(player.getUniqueId(), suffix);
+            return;
+        }
+
+        String legacySuffix = team.getSuffix();
+        if (legacySuffix != null && !legacySuffix.isEmpty()) {
+            preservedSuffixes.put(player.getUniqueId(), legacySuffix);
+        }
+    }
+
+    /**
+     * CargoPlus is compiled against Spigot API, which does not expose Paper's
+     * Adventure Component Team suffix methods. When running on Paper, use
+     * reflection so an Adventure suffix (including hover events) survives
+     * CargoPlus team recreation. On plain Spigot, fall back to the legacy
+     * String suffix API.
+     */
+    private Object readPaperSuffix(Team team) {
+        try {
+            Method method = team.getClass().getMethod("suffix");
+            return method.invoke(team);
+        } catch (ReflectiveOperationException ignored) {
+            return null;
+        }
+    }
+
+    private void restoreSuffix(Team team, Object suffix) {
+        if (suffix instanceof String legacySuffix) {
+            team.setSuffix(legacySuffix);
+            return;
+        }
+
+        try {
+            for (Method method : team.getClass().getMethods()) {
+                if (!method.getName().equals("suffix") || method.getParameterCount() != 1) continue;
+                if (!method.getParameterTypes()[0].isInstance(suffix)) continue;
+                method.invoke(team, suffix);
+                return;
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Keep CargoPlus compatible with the Spigot API if Paper's
+            // Adventure suffix methods are not present at runtime.
         }
     }
 
