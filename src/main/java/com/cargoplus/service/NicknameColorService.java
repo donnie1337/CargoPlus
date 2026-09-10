@@ -34,17 +34,22 @@ public final class NicknameColorService {
         if (player == null || !player.isOnline()) return;
         ChatColor color = resolveColor(user, groups);
         player.setDisplayName(color + player.getName());
-        player.setPlayerListName(color + player.getName());
         applyTeam(player, color, user.group(), groups);
+        refreshTabName(player, color, user.group(), groups);
     }
 
     public void refreshAnimatedPrefix(Player player, String group, GroupService groups) {
         if (player == null || !player.isOnline() || groups == null || group == null) return;
         Team team = findTeam(player);
-        if (team == null) return;
         var cargo = groups.get(group);
         if (cargo == null) return;
-        writePrefix(team, prefixAnimation.animate(cargo.prefix(), group));
+
+        String animatedPrefix = prefixAnimation.animate(cargo.prefix(), group);
+        writePrefix(team, animatedPrefix);
+
+        // setPlayerListName overrides the normal TAB rendering, so the animated
+        // prefix must also be written directly into the TAB entry.
+        refreshTabName(player, resolveColor(groups, group), group, groups);
     }
 
     public void remove(Player player) {
@@ -96,10 +101,24 @@ public final class NicknameColorService {
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
 
-        // This is the same Team used by /v for its suffix. The Team prefix is
-        // rendered by Minecraft both above the player's head and in TAB.
+        // The same Team is used by /v for its suffix. The prefix is rendered
+        // above the player's head, while the TAB entry is updated separately.
         writePrefix(team, prefixAnimation.animate(groups.get(group).prefix(), group));
         player.setCollidable(false);
+    }
+
+    private void refreshTabName(Player player, ChatColor color, String group, GroupService groups) {
+        if (player == null || !player.isOnline() || groups == null || group == null) return;
+        var cargo = groups.get(group);
+        if (cargo == null) return;
+        String prefix = prefixAnimation.animate(cargo.prefix(), group);
+        String name = prefix + color + player.getName();
+        player.setPlayerListName(name);
+    }
+
+    private ChatColor resolveColor(GroupService groups, String group) {
+        ChatColor color = colors.resolve(groups.nameColor(group));
+        return color == null ? ChatColor.WHITE : color;
     }
 
     private void preserveSuffix(Player player, Team team) {
