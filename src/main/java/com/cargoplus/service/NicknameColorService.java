@@ -1,10 +1,8 @@
 package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -98,25 +96,13 @@ public final class NicknameColorService {
             restoreSuffix(team, preservedSuffix);
         }
 
-        team.addEntry(player.getName());
-        player.setCollidable(false);
-
-        // EssentialsPlus applies the vanish suffix only after CargoPlus has
-        // finalized the Team, preventing the suffix from being overwritten
-        // and eliminating the visible blink caused by delayed retries.
-        refreshEssentialsPlusVanish(player);
-    }
-
-    private void refreshEssentialsPlusVanish(Player player) {
-        Plugin essentialsPlus = Bukkit.getPluginManager().getPlugin("EssentialsPlus");
-        if (essentialsPlus == null || !essentialsPlus.isEnabled()) return;
-
-        try {
-            Method method = essentialsPlus.getClass().getMethod("refreshVanishSuffix", Player.class);
-            method.invoke(essentialsPlus, player);
-        } catch (ReflectiveOperationException ignored) {
-            // EssentialsPlus is optional; CargoPlus must remain independent.
+        // Do not remove/re-add the entry when it is already in the correct Team.
+        // Recreating or needlessly touching the Team sends scoreboard updates to
+        // the client and makes the vanish suffix visibly blink.
+        if (!team.hasEntry(player.getName())) {
+            team.addEntry(player.getName());
         }
+        player.setCollidable(false);
     }
 
     private void preserveSuffix(Player player, Team team) {
