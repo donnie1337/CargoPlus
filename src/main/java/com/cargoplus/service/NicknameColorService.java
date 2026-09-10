@@ -35,7 +35,7 @@ public final class NicknameColorService {
         ChatColor color = resolveColor(user, groups);
         player.setDisplayName(color + player.getName());
         applyTeam(player, color, user.group(), groups);
-        refreshTabName(player, color, user.group(), groups);
+        refreshTabName(player, color);
     }
 
     public void refreshAnimatedPrefix(Player player, String group, GroupService groups) {
@@ -47,9 +47,9 @@ public final class NicknameColorService {
         String animatedPrefix = prefixAnimation.animate(cargo.prefix(), group);
         writePrefix(team, animatedPrefix);
 
-        // setPlayerListName overrides the normal TAB rendering, so the animated
-        // prefix must also be written directly into the TAB entry.
-        refreshTabName(player, resolveColor(groups, group), group, groups);
+        // TAB already renders the Team prefix. Do not put the prefix into
+        // setPlayerListName(), otherwise the prefix is duplicated/overridden.
+        refreshTabName(player, resolveColor(groups, group));
     }
 
     public void remove(Player player) {
@@ -101,19 +101,15 @@ public final class NicknameColorService {
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
 
-        // The same Team is used by /v for its suffix. The prefix is rendered
-        // above the player's head, while the TAB entry is updated separately.
+        // The Team prefix is rendered both above the head and in TAB.
+        // Keep setPlayerListName() limited to the player's name/color.
         writePrefix(team, prefixAnimation.animate(groups.get(group).prefix(), group));
         player.setCollidable(false);
     }
 
-    private void refreshTabName(Player player, ChatColor color, String group, GroupService groups) {
-        if (player == null || !player.isOnline() || groups == null || group == null) return;
-        var cargo = groups.get(group);
-        if (cargo == null) return;
-        String prefix = prefixAnimation.animate(cargo.prefix(), group);
-        String name = prefix + color + player.getName();
-        player.setPlayerListName(name);
+    private void refreshTabName(Player player, ChatColor color) {
+        if (player == null || !player.isOnline()) return;
+        player.setPlayerListName(color + player.getName());
     }
 
     private ChatColor resolveColor(GroupService groups, String group) {
