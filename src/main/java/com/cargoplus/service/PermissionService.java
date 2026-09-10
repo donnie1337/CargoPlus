@@ -93,7 +93,13 @@ public final class PermissionService {
         else if (!existing.name().equals(player.getName())) storage.put(new UserData(existing.uuid(), player.getName(), existing.group(), existing.chatColor()));
     }
     public synchronized void apply(Player player, UserData user) {
-        remove(player);
+        if (player == null || user == null) return;
+
+        // Reaplica apenas as permissões. Não remove a Team antes de atualizar,
+        // pois isso destrói a Team e fazia a tag de vanish piscar no cliente.
+        PermissionAttachment old = attachments.remove(player.getUniqueId());
+        if (old != null) player.removeAttachment(old);
+
         PermissionAttachment attachment = player.addAttachment(plugin);
         for (String permission : groups.resolvePermissions(user.group())) attachment.setPermission(permission, true);
         attachments.put(player.getUniqueId(), attachment);
