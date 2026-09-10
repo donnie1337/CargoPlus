@@ -9,6 +9,7 @@ import com.cargoplus.service.CargoPlusColorConfig;
 import com.cargoplus.service.GroupService;
 import com.cargoplus.service.NicknameColorService;
 import com.cargoplus.service.PermissionService;
+import com.cargoplus.service.PrefixAnimationService;
 import com.cargoplus.storage.Storage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -50,7 +51,8 @@ public final class CargoPlus extends JavaPlugin {
             Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             loadedStorage.load();
             CargoPlusColorConfig loadedChatColors = new CargoPlusColorConfig(getConfig());
-            NicknameColorService loadedNicknameColors = new NicknameColorService(loadedChatColors);
+            PrefixAnimationService animation = new PrefixAnimationService(getConfig());
+            NicknameColorService loadedNicknameColors = new NicknameColorService(loadedChatColors, animation);
             groups = loadedGroups;
             storage = loadedStorage;
             chatColors = loadedChatColors;
@@ -72,14 +74,24 @@ public final class CargoPlus extends JavaPlugin {
             permissions.remove(player);
             if (isAuthenticated(player)) ensureUser(player);
         }
+        startAnimatedPrefixTask();
         getLogger().info("CargoPlus ativado com " + groups.all().size() + " cargos.");
+    }
+
+    private void startAnimatedPrefixTask() {
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            if (permissions == null || nicknameColors == null || groups == null) return;
+            for (Player player : getServer().getOnlinePlayers()) {
+                if (!isAuthenticated(player)) continue;
+                String group = permissions.getGroup(player.getUniqueId());
+                nicknameColors.refreshAnimatedPrefix(player, group, groups);
+            }
+        }, 1L, 2L);
     }
 
     private void ensureMessagesFile() {
         File messagesFile = new File(getDataFolder(), "messages.yml");
-        if (!messagesFile.exists()) {
-            saveResource("messages.yml", false);
-        }
+        if (!messagesFile.exists()) saveResource("messages.yml", false);
     }
 
     private void registerCommands() {
@@ -98,10 +110,8 @@ public final class CargoPlus extends JavaPlugin {
         getServer().getServicesManager().register(CargoPlusAPI.class, api, this, ServicePriority.Normal);
     }
 
-    /** Reserva no LoginPlus os nicknames que possuem o cargo de maior nivel (DEV atualmente). */
     private void protectAdministrativeIdentities() {
-        if (groups == null || storage == null) return;
-        if (groups.hierarchy().isEmpty()) return;
+        if (groups == null || storage == null || groups.hierarchy().isEmpty()) return;
         String topGroup = groups.hierarchy().get(groups.hierarchy().size() - 1);
         for (UserData user : storage.snapshot().values()) {
             if (user == null || !topGroup.equalsIgnoreCase(user.group())) continue;
@@ -109,7 +119,6 @@ public final class CargoPlus extends JavaPlugin {
         }
     }
 
-    /** Integra com o LoginPlus sem criar dependencia de compilacao entre os plugins. */
     private void protectLoginIdentity(String username, UUID uuid) {
         if (username == null || username.isBlank() || uuid == null) return;
         Plugin loginPlus = getServer().getPluginManager().getPlugin("LoginPlus");
@@ -130,9 +139,7 @@ public final class CargoPlus extends JavaPlugin {
                 saveExecutor.shutdown();
                 if (!saveExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                     saveExecutor.shutdownNow();
-                    if (!saveExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
-                        getLogger().warning("A fila de salvamento do CargoPlus nao terminou antes do desligamento.");
-                    }
+                    if (!saveExecutor.awaitTermination(2, TimeUnit.SECONDS)) getLogger().warning("A fila de salvamento do CargoPlus nao terminou antes do desligamento.");
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
@@ -140,9 +147,7 @@ public final class CargoPlus extends JavaPlugin {
             }
             try { storage.save(); }
             catch (IOException ex) { getLogger().severe("Não foi possível salvar data.yml: " + ex.getMessage()); }
-        } else {
-            saveExecutor.shutdownNow();
-        }
+        } else saveExecutor.shutdownNow();
     }
 
     private void loadMessages() {
@@ -151,29 +156,13 @@ public final class CargoPlus extends JavaPlugin {
         for (String key : yaml.getKeys(false)) messages.put(key, yaml.getString(key, ""));
     }
 
-    public String message(String key) {
-        return ChatColor.translateAlternateColorCodes('&', messages.getOrDefault(key, "&cMensagem não configurada: " + key));
-    }
-
+    public String message(String key) { return ChatColor.translateAlternateColorCodes('&', messages.getOrDefault(key, "&cMensagem não configurada: " + key)); }
     public GroupService groups() { return groups; }
     public PermissionService permissions() { return permissions; }
     public CargoPlusAPI api() { return api; }
-
-    public String getCargoDisplayName(String group) {
-        if (group == null || groups == null || groups.get(group) == null) return group == null ? "" : group;
-        return groups.get(group).displayName();
-    }
-
-    public String getCargoColor(String group) {
-        if (group == null || groups == null || chatColors == null) return ChatColor.WHITE.toString();
-        ChatColor color = chatColors.resolve(groups.nameColor(group));
-        return color == null ? ChatColor.WHITE.toString() : color.toString();
-    }
-
-    /** O cargo padrão não exibe mensagem de entrada/saída. */
-    public boolean receivesJoinQuitMessage(String group) {
-        return groups != null && group != null && !groups.defaultGroup().equalsIgnoreCase(group.trim());
-    }
+    public String getCargoDisplayName(String group) { if (group == null || groups == null || groups.get(group) == null) return group == null ? "" : group; return groups.get(group).displayName(); }
+    public String getCargoColor(String group) { if (group == null || groups == null || chatColors == null) return ChatColor.WHITE.toString(); ChatColor color = chatColors.resolve(groups.nameColor(group)); return color == null ? ChatColor.WHITE.toString() : color.toString(); }
+    public boolean receivesJoinQuitMessage(String group) { return groups != null && group != null && !groups.defaultGroup().equalsIgnoreCase(group.trim()); }
 
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
@@ -183,16 +172,11 @@ public final class CargoPlus extends JavaPlugin {
             Method method = auth.getClass().getMethod("isAuthenticated", Player.class);
             Object result = method.invoke(auth, player);
             return result instanceof Boolean && (Boolean) result;
-        } catch (ReflectiveOperationException | LinkageError ex) {
-            return false;
-        }
+        } catch (ReflectiveOperationException | LinkageError ex) { return false; }
     }
 
     public void ensureUser(Player player) {
-        if (!isAuthenticated(player)) {
-            permissions.remove(player);
-            return;
-        }
+        if (!isAuthenticated(player)) { permissions.remove(player); return; }
         permissions.ensureUser(player);
         permissions.apply(player, permissions.getUser(player.getUniqueId()));
         saveAsync();
@@ -218,10 +202,7 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     public Map<String, String> chatColors() { return chatColors.allowedColors(); }
-
-    public String getChatColor(Player player) {
-        return player == null ? "" : permissions.getChatColor(player.getUniqueId());
-    }
+    public String getChatColor(Player player) { return player == null ? "" : permissions.getChatColor(player.getUniqueId()); }
 
     public synchronized void reloadPlugin(CommandSender sender) {
         try {
@@ -232,7 +213,8 @@ public final class CargoPlus extends JavaPlugin {
             Storage newStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             newStorage.load();
             CargoPlusColorConfig newChatColors = new CargoPlusColorConfig(getConfig());
-            NicknameColorService newNicknameColors = new NicknameColorService(newChatColors);
+            PrefixAnimationService newAnimation = new PrefixAnimationService(getConfig());
+            NicknameColorService newNicknameColors = new NicknameColorService(newChatColors, newAnimation);
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
 
