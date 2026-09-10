@@ -28,7 +28,7 @@ chat:
 animacoes:
   dev:
     ativado: true
-    intervalo-segundos: 10
+    intervalo-segundos: 3
     duracao-branco-letra-ms: 300
     duracao-normal-letra-ms: 150
     duracao-branco-total-ms: 250
