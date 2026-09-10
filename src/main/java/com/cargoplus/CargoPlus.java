@@ -62,7 +62,7 @@ public final class CargoPlus extends JavaPlugin {
             prefixAnimation = animation;
             nicknameColors = loadedNicknameColors;
             permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedColors);
-            api = new CargoPlusAPI(permissions, groups);
+            api = new CargoPlusAPI(permissions, groups, animation);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
             getServer().getPluginManager().disablePlugin(this);
@@ -217,7 +217,7 @@ public final class CargoPlus extends JavaPlugin {
     public Map<String, String> chatColors() { return chatColors.allowedColors(); }
     public String getChatColor(Player player) { return player == null ? "" : permissions.getChatColor(player.getUniqueId()); }
 
-    public synchronized void reloadPlugin(CommandSender sender) {
+    public void reloadPlugin(CommandSender sender) {
         try {
             reloadConfig();
             ensureMessagesFile();
@@ -229,7 +229,7 @@ public final class CargoPlus extends JavaPlugin {
             newStorage.load();
             NicknameColorService newNicknameColors = new NicknameColorService(newChatColors, newAnimation);
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
-            CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
+            CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups, newAnimation);
 
             PermissionService oldPermissions = permissions;
             stopAnimatedPrefixTask();
