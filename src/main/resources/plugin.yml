@@ -14,7 +14,6 @@ commands:
   setcargo:
     description: Define um cargo configurado para um jogador.
     usage: /setcargo <jogador> <cargo>
-    permission: cargoplus.setcargo
   removercargo:
     description: Remove o cargo personalizado e retorna o jogador ao cargo padrão.
     usage: /removercargo <jogador>
@@ -30,7 +29,7 @@ permissions:
     description: Permite promover jogadores dentro da hierarquia configurada.
     default: false
   cargoplus.setcargo:
-    description: Permite definir cargos configurados para jogadores.
+    description: Permissão reservada para a operação administrativa de setcargo.
     default: false
   cargoplus.removercargo:
     description: Permite remover o cargo de jogadores.
