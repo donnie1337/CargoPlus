@@ -17,9 +17,12 @@ public final class PrefixAnimationService {
     private final long totalWhiteMillis;
     private final long totalNormalMillis;
     private final int totalBlinks;
+    private final long animationStartMillis;
 
     public PrefixAnimationService(FileConfiguration config) {
         var section = config.getConfigurationSection("animacoes.dev");
+        animationStartMillis = System.currentTimeMillis();
+
         if (section == null) {
             enabled = false;
             intervalMillis = 10_000L;
@@ -60,9 +63,13 @@ public final class PrefixAnimationService {
         long blinkPhase = 2L * totalBlinks * (totalWhiteMillis + totalNormalMillis);
         long animationDuration = letterPhase + blinkPhase;
         long cycleDuration = intervalMillis + animationDuration;
-        long phase = Math.floorMod(System.currentTimeMillis(), cycleDuration);
 
-        // During the idle interval, return the normal gradient — already converted.
+        // The cycle is anchored when this service is created. Using the absolute
+        // system clock here would make a newly joined player see a random frame
+        // (for example E -> DEV), which breaks the visual sequence.
+        long phase = Math.floorMod(System.currentTimeMillis() - animationStartMillis, cycleDuration);
+
+        // Wait the configured interval before starting a complete animation.
         if (phase < intervalMillis) {
             return buildPrefix(matcher, startHex, endHex, content, -1, false);
         }
@@ -71,6 +78,7 @@ public final class PrefixAnimationService {
         int whiteCharacter = -1;
         long cursor = animationPhase;
 
+        // Strict sequence: D -> E -> V.
         for (int index = 0; index < 3; index++) {
             long slot = letterWhiteMillis + letterNormalMillis;
             if (cursor < slot) {
@@ -80,6 +88,7 @@ public final class PrefixAnimationService {
             cursor -= slot;
         }
 
+        // After D -> E -> V, blink the complete DEV exactly N times.
         long blinkSlot = totalWhiteMillis + totalNormalMillis;
         long blinkIndex = cursor / blinkSlot;
         long blinkOffset = cursor % blinkSlot;
