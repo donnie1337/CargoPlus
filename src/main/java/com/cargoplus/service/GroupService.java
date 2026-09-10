@@ -19,10 +19,11 @@ public final class GroupService {
     private final CargoPlusColorConfig colors;
     private final PrefixAnimationService prefixAnimation;
 
-    public GroupService(FileConfiguration config) { this(config, new CargoPlusColorConfig(config)); }
-    public GroupService(FileConfiguration config, CargoPlusColorConfig colors) {
+    public GroupService(FileConfiguration config) { this(config, new CargoPlusColorConfig(config), new PrefixAnimationService(config)); }
+    public GroupService(FileConfiguration config, CargoPlusColorConfig colors) { this(config, colors, new PrefixAnimationService(config)); }
+    public GroupService(FileConfiguration config, CargoPlusColorConfig colors, PrefixAnimationService prefixAnimation) {
         this.colors = colors;
-        this.prefixAnimation = new PrefixAnimationService(config);
+        this.prefixAnimation = prefixAnimation;
         this.defaultGroup = normalize(config.getString("default-group", "membro"));
         if (!isSafeGroupName(defaultGroup)) throw new IllegalStateException("default-group invalido: " + defaultGroup);
         for (String name : config.getStringList("hierarchy")) {
@@ -76,7 +77,7 @@ public final class GroupService {
     public Set<String> resolvePermissions(String group) { String normalized = normalize(group); if (normalized.isBlank()) return Set.of(); return permissionCache.computeIfAbsent(normalized, key -> { Set<String> result = new LinkedHashSet<>(); resolve(key, result, new HashSet<>()); return Set.copyOf(result); }); }
     private void resolve(String name, Set<String> result, Set<String> visiting) { name = normalize(name); if (!visiting.add(name)) return; Group group = groups.get(name); if (group == null) return; for (String parent : group.parents()) resolve(parent, result, visiting); result.addAll(group.permissions()); visiting.remove(name); }
 
-    /** Retorna o prefixo como configurado, preservando gradientes, estilos e a animação especial do DEV. */
+    /** Retorna o prefixo como configurado, incluindo o frame atual da animação especial do DEV. */
     public String prefix(String group) {
         Group g = get(group);
         if (g == null || g.prefix().isBlank()) return "";
