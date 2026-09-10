@@ -1,6 +1,8 @@
 package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -97,8 +99,8 @@ public final class NicknameColorService {
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
 
         // This is the same Team used by /v for its suffix. The Team prefix is
-        // therefore rendered by Minecraft both above the player's head and in
-        // TAB, keeping both views synchronized.
+        // rendered by Minecraft both above the player's head and in TAB, keeping
+        // both views synchronized.
         writePrefix(team, prefixAnimation.animate(groups.get(group).prefix(), group));
         player.setCollidable(false);
     }
@@ -136,7 +138,7 @@ public final class NicknameColorService {
                 return;
             }
         } catch (ReflectiveOperationException ignored) {
-            // Keep CargoPlus compatible with the Bukkit API if Paper's
+            // Keep CargoPlus compatible with the Spigot API if Paper's
             // Adventure suffix methods are not present at runtime.
         }
     }
@@ -144,12 +146,23 @@ public final class NicknameColorService {
     private void writePrefix(Team team, String legacyPrefix) {
         if (team == null) return;
         String safe = legacyPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', legacyPrefix);
+
+        // Paper exposes Adventure Component prefix methods. Use them first so
+        // RGB gradients are not expanded into a legacy string that can hit the
+        // scoreboard's legacy prefix length limit.
         try {
-            Method method = team.getClass().getMethod("setPrefix", String.class);
-            method.invoke(team, safe);
+            Component component = LegacyComponentSerializer.legacySection().deserialize(safe);
+            for (Method method : team.getClass().getMethods()) {
+                if (!method.getName().equals("prefix") || method.getParameterCount() != 1) continue;
+                if (!method.getParameterTypes()[0].isInstance(component)) continue;
+                method.invoke(team, component);
+                return;
+            }
         } catch (ReflectiveOperationException ignored) {
-            team.setPrefix(safe);
+            // Fall back to the Bukkit String API below.
         }
+
+        team.setPrefix(safe);
     }
 
     private Team findTeam(Player player) {
