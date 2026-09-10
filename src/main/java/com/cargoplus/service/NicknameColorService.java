@@ -38,15 +38,13 @@ public final class NicknameColorService {
         applyTeam(player, color, user.group(), groups);
     }
 
-    public void refreshAnimatedPrefix(Player player, GroupService groups) {
-        if (player == null || !player.isOnline() || groups == null) return;
-        String group = groups.get(playerGroup(player)) == null ? "" : playerGroup(player);
-        if (group.isBlank()) return;
+    public void refreshAnimatedPrefix(Player player, String group, GroupService groups) {
+        if (player == null || !player.isOnline() || groups == null || group == null) return;
         Team team = findTeam(player);
         if (team == null) return;
-        String configuredPrefix = groups.get(group).prefix();
-        String renderedPrefix = prefixAnimation.animate(configuredPrefix, group);
-        writePrefix(team, renderedPrefix);
+        var cargo = groups.get(group);
+        if (cargo == null) return;
+        writePrefix(team, prefixAnimation.animate(cargo.prefix(), group));
     }
 
     public void remove(Player player) {
@@ -96,15 +94,12 @@ public final class NicknameColorService {
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
-
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
 
-        // The same scoreboard Team controls the nametag above the player and
-        // the player's entry in TAB. We therefore animate this one prefix so
-        // both views stay perfectly synchronized.
-        String configuredPrefix = groups.get(group) == null ? "" : groups.get(group).prefix();
-        writePrefix(team, prefixAnimation.animate(configuredPrefix, group));
-
+        // This is the same Team used by /v for its suffix. The Team prefix is
+        // therefore rendered by Minecraft both above the player's head and in
+        // TAB, keeping both views synchronized.
+        writePrefix(team, prefixAnimation.animate(groups.get(group).prefix(), group));
         player.setCollidable(false);
     }
 
@@ -141,7 +136,7 @@ public final class NicknameColorService {
                 return;
             }
         } catch (ReflectiveOperationException ignored) {
-            // Keep CargoPlus compatible with the Spigot API if Paper's
+            // Keep CargoPlus compatible with the Bukkit API if Paper's
             // Adventure suffix methods are not present at runtime.
         }
     }
@@ -149,21 +144,11 @@ public final class NicknameColorService {
     private void writePrefix(Team team, String legacyPrefix) {
         if (team == null) return;
         String safe = legacyPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', legacyPrefix);
-        if (writePaperPrefix(team, safe)) return;
-        team.setPrefix(safe);
-    }
-
-    private boolean writePaperPrefix(Team team, String legacyPrefix) {
-        // Prefer the legacy setter because CargoPlus is compiled against the
-        // Bukkit API and the generated RGB §x format is supported by Paper.
-        // This method exists only as a compatibility fallback for runtimes
-        // exposing a Component-only Team prefix API.
         try {
             Method method = team.getClass().getMethod("setPrefix", String.class);
-            method.invoke(team, legacyPrefix);
-            return true;
+            method.invoke(team, safe);
         } catch (ReflectiveOperationException ignored) {
-            return false;
+            team.setPrefix(safe);
         }
     }
 
@@ -173,10 +158,6 @@ public final class NicknameColorService {
         if (team != null) return team;
         Scoreboard main = org.bukkit.Bukkit.getScoreboardManager().getMainScoreboard();
         return main == scoreboard ? null : main.getEntryTeam(player.getName());
-    }
-
-    private String playerGroup(Player player) {
-        return player.getScoreboard().getEntryTeam(player.getName()) == null ? "" : "dev";
     }
 
     public Map<String, String> allowedColors() { return colors.allowedColors(); }
