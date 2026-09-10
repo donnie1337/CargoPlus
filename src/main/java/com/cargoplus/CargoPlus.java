@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public final class CargoPlus extends JavaPlugin {
     private NicknameColorService nicknameColors;
     private CargoPlusColorConfig chatColors;
     private PrefixAnimationService prefixAnimation;
+    private BukkitTask animatedPrefixTask;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "CargoPlus-Save");
         thread.setDaemon(true);
@@ -49,17 +51,17 @@ public final class CargoPlus extends JavaPlugin {
         loadMessages();
         try {
             PrefixAnimationService animation = new PrefixAnimationService(getConfig());
-            GroupService loadedGroups = new GroupService(getConfig(), new CargoPlusColorConfig(getConfig()), animation);
+            CargoPlusColorConfig loadedColors = new CargoPlusColorConfig(getConfig());
+            GroupService loadedGroups = new GroupService(getConfig(), loadedColors, animation);
             Storage loadedStorage = new Storage(getDataFolder(), getConfig().getString("storage.file", "data.yml"));
             loadedStorage.load();
-            CargoPlusColorConfig loadedChatColors = new CargoPlusColorConfig(getConfig());
-            NicknameColorService loadedNicknameColors = new NicknameColorService(loadedChatColors, animation);
+            NicknameColorService loadedNicknameColors = new NicknameColorService(loadedColors, animation);
             groups = loadedGroups;
             storage = loadedStorage;
-            chatColors = loadedChatColors;
+            chatColors = loadedColors;
             prefixAnimation = animation;
             nicknameColors = loadedNicknameColors;
-            permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedChatColors);
+            permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedColors);
             api = new CargoPlusAPI(permissions, groups);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
@@ -81,7 +83,8 @@ public final class CargoPlus extends JavaPlugin {
     }
 
     private void startAnimatedPrefixTask() {
-        getServer().getScheduler().runTaskTimer(this, () -> {
+        stopAnimatedPrefixTask();
+        animatedPrefixTask = getServer().getScheduler().runTaskTimer(this, () -> {
             if (permissions == null || nicknameColors == null || groups == null || prefixAnimation == null) return;
             for (Player player : getServer().getOnlinePlayers()) {
                 if (!isAuthenticated(player)) continue;
@@ -89,6 +92,13 @@ public final class CargoPlus extends JavaPlugin {
                 nicknameColors.refreshAnimatedPrefix(player, group, groups);
             }
         }, 1L, 2L);
+    }
+
+    private void stopAnimatedPrefixTask() {
+        if (animatedPrefixTask != null) {
+            animatedPrefixTask.cancel();
+            animatedPrefixTask = null;
+        }
     }
 
     private void ensureMessagesFile() {
@@ -135,6 +145,7 @@ public final class CargoPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        stopAnimatedPrefixTask();
         if (permissions != null) permissions.clearAll();
         if (storage != null) {
             try {
@@ -221,6 +232,7 @@ public final class CargoPlus extends JavaPlugin {
             CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups);
 
             PermissionService oldPermissions = permissions;
+            stopAnimatedPrefixTask();
             groups = newGroups;
             storage = newStorage;
             chatColors = newChatColors;
@@ -239,6 +251,7 @@ public final class CargoPlus extends JavaPlugin {
                 }
             }
             registerApi();
+            startAnimatedPrefixTask();
             saveAsync();
             sender.sendMessage(message("reloaded"));
         } catch (Exception ex) {
