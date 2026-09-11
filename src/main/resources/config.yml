@@ -55,8 +55,6 @@ groups:
       - chatplus.local
       - chatplus.global
       - essentialsplus.tpa
-      - essentialsplus.ec
-      - essentialsplus.bau
     parents: []
   ajudante:
     display-name: "Ajudante"
@@ -70,6 +68,8 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.vanish
       - essentialsplus.inspect
+      - essentialsplus.ec
+      - essentialsplus.bau
     parents:
       - membro
   moderador:
