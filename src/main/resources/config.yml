@@ -55,6 +55,7 @@ groups:
       - chatplus.local
       - chatplus.global
       - essentialsplus.tpa
+      - essentialsplus.tell
     parents: []
   ajudante:
     display-name: "Ajudante"
@@ -70,6 +71,7 @@ groups:
       - essentialsplus.inspect
       - essentialsplus.ec
       - essentialsplus.bau
+      - essentialsplus.tell
     parents:
       - membro
   moderador:
@@ -84,6 +86,7 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.vanish
       - essentialsplus.inspect
+      - essentialsplus.tell
     parents:
       - ajudante
   administrador:
@@ -99,6 +102,7 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.vanish
       - essentialsplus.inspect
+      - essentialsplus.tell
     parents:
       - moderador
   gerente:
@@ -114,6 +118,7 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.vanish
       - essentialsplus.inspect
+      - essentialsplus.tell
     parents:
       - administrador
   dev:
@@ -137,5 +142,6 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.vanish
       - essentialsplus.inspect
+      - essentialsplus.tell
     parents:
       - gerente
