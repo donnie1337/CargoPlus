@@ -1,10 +1,24 @@
+# ============================================================
+# CargoPlus - Configuração principal
+# ============================================================
+#
+# As chaves técnicas abaixo são mantidas por compatibilidade com
+# o código atual do plugin. Os comentários e a organização estão
+# padronizados em português sem alterar cargos, permissões ou mensagens.
+# ============================================================
+
+# Arquivo onde os dados dos cargos são armazenados.
 storage:
   file: data.yml
 
+# Cargo atribuído automaticamente a jogadores sem outro cargo.
 default-group: membro
 
-# Cores que podem ser escolhidas para o texto enviado pelo jogador.
-# Estas cores NÃO alteram a cor do nickname nem a cor do cargo.
+# ------------------------------------------------------------
+# CORES DO CHAT
+# ------------------------------------------------------------
+# Estas cores alteram somente o texto enviado pelo jogador.
+# Não alteram a cor do nickname nem a cor do cargo.
 chat:
   default-color: branco
   colors:
@@ -22,9 +36,12 @@ chat:
     roxo: "&5"
     aqua: "&3"
 
-# Animações especiais dos cargos.
-# O DEV mantém o small caps e o gradiente roxo -> azul.
-# A animação apenas faz as letras piscarem em branco e depois volta ao gradiente.
+# ------------------------------------------------------------
+# ANIMAÇÕES DOS CARGOS
+# ------------------------------------------------------------
+# Somente o DEV utiliza a animação especial.
+# O small caps e o gradiente roxo -> azul são preservados.
+# A animação faz as letras piscarem em branco e retorna ao gradiente.
 animacoes:
   dev:
     ativado: true
@@ -35,9 +52,10 @@ animacoes:
     duracao-normal-total-ms: 250
     piscadas-totais: 3
 
-# A cor do cargo é definida em name-color.
-# Essa mesma cor é aplicada ao prefixo/cargo, nickname e futuramente ao TAB.
-# Não existe uma cor separada para o nickname.
+# ------------------------------------------------------------
+# HIERARQUIA DOS CARGOS
+# ------------------------------------------------------------
+# A ordem abaixo define a hierarquia de menor para maior.
 hierarchy:
   - membro
   - ajudante
@@ -46,6 +64,9 @@ hierarchy:
   - gerente
   - dev
 
+# ------------------------------------------------------------
+# CARGOS
+# ------------------------------------------------------------
 groups:
   membro:
     display-name: "Membro"
