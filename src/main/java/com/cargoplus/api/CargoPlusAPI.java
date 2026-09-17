@@ -3,6 +3,7 @@ package com.cargoplus.api;
 import com.cargoplus.service.GroupService;
 import com.cargoplus.service.PermissionService;
 import com.cargoplus.service.PrefixAnimationService;
+import org.bukkit.ChatColor;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +20,14 @@ public final class CargoPlusAPI {
     }
 
     public String getGroup(UUID uuid) { return permissions.getGroup(uuid); }
-    public String getPrefix(UUID uuid) { return permissions.getPrefix(uuid); }
+    /** Retorna o prefixo estático para integrações que não devem usar animação. */
+    public String getPrefix(UUID uuid) {
+        String group = getGroup(uuid);
+        if (group == null || group.isBlank()) return "";
+        var cargo = groups.get(group);
+        if (cargo == null || cargo.prefix().isBlank()) return "";
+        return ChatColor.translateAlternateColorCodes('&', cargo.prefix());
+    }
     public String getAnimatedPrefix(UUID uuid) {
         String group = getGroup(uuid);
         if (group == null || group.isBlank()) return "";
