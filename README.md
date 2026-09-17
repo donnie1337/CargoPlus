@@ -1,79 +1,98 @@
 # CargoPlus
 
-Sistema de **cargos, hierarquia e permissões** para servidores Minecraft, integrado ao ecossistema do servidor e ao LoginPlus.
+O CargoPlus é o plugin que cuida dos cargos, hierarquia e permissões do meu servidor.
 
-## ✨ Funcionalidades
+A ideia é deixar os cargos centralizados em um lugar só, para os outros plugins conseguirem usar as mesmas informações de cargo, prefixo e cor.
 
-### 👑 Sistema de cargos
-- Cargos configuráveis em hierarquia.
-- Promoção para o próximo cargo disponível.
+## O que tem no plugin
+
+### Cargos
+
+- Cargos configuráveis em uma hierarquia.
+- Promoção para o próximo cargo.
 - Definição manual de cargo.
-- Remoção do cargo personalizado e retorno ao cargo padrão.
+- Remoção de cargo personalizado.
 - Aplicação das permissões do cargo ao jogador.
-- Persistência dos dados dos jogadores.
+- Dados dos jogadores salvos para não perder as informações depois do restart.
 
-### 🔐 Permissões
-O CargoPlus centraliza as permissões dos cargos e permite controlar quem pode administrar a hierarquia.
+### Permissões
 
-Permissões administrativas principais:
+O CargoPlus controla as permissões relacionadas aos cargos e também possui permissões próprias para administração.
+
+Principais permissões administrativas:
+
 - `cargoplus.promover`
 - `cargoplus.setcargo`
 - `cargoplus.removercargo`
 - `cargoplus.admin`
 
-### 🎨 Integração com o chat
-O CargoPlus fornece a configuração de cores utilizada pelo **ChatPlus** e também gerencia a cor associada às mensagens do jogador.
+O `/setcargo` é um comando administrativo e não é um comando para jogador comum.
 
-A interface `/cor` pertence ao ChatPlus; o CargoPlus fornece os dados necessários para esse sistema.
+### DEV
 
-### 🔗 Integração com LoginPlus
-O CargoPlus verifica o estado de autenticação do jogador através do LoginPlus. Jogadores não autenticados não recebem as permissões do cargo.
+O cargo DEV possui uma animação própria no TAB e acima da cabeça do jogador.
 
-### 🧩 API
-O plugin registra uma API de serviço para que outros plugins possam consultar e utilizar o sistema de cargos e permissões.
+Essa animação não precisa aparecer no chat. O ChatPlus usa o prefixo normal do cargo para manter o chat estável, enquanto o TAB e o nametag podem usar a animação.
 
-### 💾 Persistência e segurança
-- Dados armazenados em arquivo configurável.
-- Salvamento assíncrono para reduzir impacto no servidor.
-- Snapshot dos dados antes da gravação.
-- Salvamento seguro durante o desligamento.
-- Recarregamento da configuração sem precisar reiniciar o servidor.
+### Integração com o ChatPlus
 
-## 🎮 Comandos
+O CargoPlus fornece para o ChatPlus as informações de cargo, prefixo e cores usadas no chat.
 
-| Comando | Função |
+A ideia é que eu consiga mudar o cargo de um jogador no CargoPlus e os outros plugins já consigam pegar essa informação automaticamente.
+
+### Integração com LoginPlus
+
+O CargoPlus usa o LoginPlus para saber se o jogador já está autenticado. Jogadores que ainda não fizeram login não recebem as permissões do cargo.
+
+### API
+
+O plugin disponibiliza uma API para os outros plugins do servidor consultarem cargos, prefixos, cores e permissões.
+
+### Salvamento
+
+- Dados salvos em arquivo.
+- Salvamento assíncrono.
+- Proteção contra gravações concorrentes.
+- Salvamento seguro ao desligar o servidor.
+- Configuração podendo ser recarregada sem precisar reiniciar.
+
+## Comandos
+
+| Comando | O que faz |
 |---|---|
-| `/promover <jogador>` | Promove o jogador para o próximo cargo da hierarquia. |
-| `/setcargo <jogador> <cargo>` | Define um cargo configurado para o jogador. |
-| `/removercargo <jogador>` | Remove o cargo personalizado e retorna ao cargo padrão. |
+| `/promover <jogador>` | Promove o jogador para o próximo cargo. |
+| `/setcargo <jogador> <cargo>` | Define o cargo do jogador. |
+| `/removercargo <jogador>` | Remove o cargo personalizado. |
 | `/cargo reload` | Recarrega o CargoPlus. |
 
-O comando `/cargo` também serve como ponto de administração do plugin.
+## Permissões
 
-## 🔑 Permissões
-
-| Permissão | Função | Padrão |
+| Permissão | O que faz | Padrão |
 |---|---|---|
 | `cargoplus.promover` | Promover jogadores | `false` |
 | `cargoplus.setcargo` | Definir cargos | `false` |
 | `cargoplus.removercargo` | Remover cargos | `false` |
 | `cargoplus.admin` | Administrar o CargoPlus | `false` |
 
-## 🔗 Dependências
+## Integrações
 
-- LoginPlus — utilizado para verificar se o jogador está autenticado.
-- ChatPlus — integração com as cores das mensagens.
+- **LoginPlus:** verifica a autenticação do jogador.
+- **ChatPlus:** usa os dados de cargo e cores no chat.
 
-## 🏗️ Plataforma
+## Plataforma
 
 - Java 26
 - Spigot API 26.2
 - Maven
 
-## 🧪 Build
+## Build
 
 ```bash
 mvn -B clean package
 ```
 
-O projeto possui workflow de build no GitHub Actions.
+O projeto possui build automático pelo GitHub Actions.
+
+## Status
+
+O CargoPlus está em desenvolvimento e é a base do sistema de cargos do meu servidor. A ideia é manter os cargos organizados e fazer com que os outros plugins consigam conversar com ele sem precisar duplicar essas informações.
