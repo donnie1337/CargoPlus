@@ -44,7 +44,7 @@ chat:
 # A animação faz as letras piscarem em branco e retorna ao gradiente.
 animacoes:
   dev:
-    ativado: false
+    ativado: true
     intervalo-segundos: 3
     duracao-branco-letra-ms: 300
     duracao-normal-letra-ms: 150
