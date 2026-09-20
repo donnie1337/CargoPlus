@@ -122,6 +122,7 @@ public final class NicknameColorService {
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
             display.setShadowed(false);
+            display.setBrightness(new Display.Brightness(15, 15));
             display.setSeeThrough(true);
             display.setGravity(false);
             display.setInvulnerable(true);
