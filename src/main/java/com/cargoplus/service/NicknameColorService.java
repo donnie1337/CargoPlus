@@ -310,29 +310,26 @@ public final class NicknameColorService {
     }
 
     private String resolveRgbColor(GroupService groups, String group) {
-        if (groups == null || group == null) return "§f";
-        var cargo = groups.get(group);
+        if (groups == null) return "§f";
+        String normalizedGroup = group == null || group.isBlank() ? groups.defaultGroup() : group.trim().toLowerCase(Locale.ROOT);
+        var cargo = groups.get(normalizedGroup);
+        if (cargo == null) cargo = groups.get(groups.defaultGroup());
         if (cargo == null) return "§f";
 
+        // name-color é a fonte oficial da cor do nickname.
+        // A mesma cor é aplicada no chat, TAB e na nametag customizada.
         String configuredRgb = parseRgbAlias(cargo.nameColor());
         if (configuredRgb != null) return configuredRgb;
-
-        // Cargos sem HEX podem usar uma cor nomeada do bloco chat.colors.
-        // Ex.: membro usa "cinza", então o nickname deve herdar exatamente &7
-        // no chat, TAB e no TextDisplay acima da cabeça.
         ChatColor configuredNamedColor = colors.resolve(cargo.nameColor());
         if (configuredNamedColor != null) return "§" + configuredNamedColor.getChar();
 
+        // Compatibilidade para cargos antigos sem name-color.
         String prefix = cargo.prefix();
         if (prefix == null || prefix.isBlank()) return "§f";
-
-        var matcher = java.util.regex.Pattern
-                .compile("<gradient:(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6})>")
-                .matcher(prefix);
+        var matcher = java.util.regex.Pattern.compile("<gradient:(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6})>").matcher(prefix);
         if (!matcher.find()) return "§f";
         return toSectionSignHex(matcher.group(2));
     }
-
     private String parseRgbAlias(String value) {
         if (value == null) return null;
         var matcher = java.util.regex.Pattern.compile("<cor:(#[0-9a-fA-F]{6})>").matcher(value.trim());
