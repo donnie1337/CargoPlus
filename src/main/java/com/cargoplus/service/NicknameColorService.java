@@ -165,8 +165,13 @@ public final class NicknameColorService {
             nametagDisplays.put(player.getUniqueId(), display);
         }
 
+        display.setDefaultBackground(false);
+        display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
+        display.setShadowed(false);
+        display.setBrightness(new Display.Brightness(15, 15));
+        display.setSeeThrough(false);
         display.setText(renderedName);
-        display.setTextOpacity(player.isSneaking() ? (byte) 40 : (byte) 100);
+        display.setTextOpacity((byte) 100);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
     }
