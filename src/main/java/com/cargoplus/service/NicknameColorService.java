@@ -271,7 +271,10 @@ public final class NicknameColorService {
         // injeta uma cor legacy no entry do jogador.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        com.cargoplus.model.Group cargo = groups.get(group);\n        ChatColor glowColor = cargo == null ? color : resolveGlowColor(cargo.glowColor(), color);\n        team.setColor(glowColor);\n        player.setGlowing(cargo != null && cargo.glow());
+        com.cargoplus.model.Group cargo = groups.get(group);
+        ChatColor glowColor = cargo == null ? color : resolveGlowColor(cargo.glowColor(), color);
+        team.setColor(glowColor);
+        player.setGlowing(cargo != null && cargo.glow());
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
