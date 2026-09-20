@@ -104,6 +104,9 @@ public final class NicknameColorService {
         String safePrefix = prefix == null ? "" : prefix;
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
         String suffix = nametagSuffixes.getOrDefault(player.getUniqueId(), "");
+        if (isVanished(player) && !containsVanishTag(suffix)) {
+            suffix = suffix + "\n§c[INVISIVEL]";
+        }
         String renderedName = safePrefix + safeColor + player.getName() + suffix;
 
         // Player#setCustomName() does not affect player nameplates on Spigot.
@@ -141,6 +144,23 @@ public final class NicknameColorService {
         }
         String rgbColor = resolveRgbColor(groups, safeGroup);
         renderCustomName(player, prefix, rgbColor);
+    }
+
+    private boolean isVanished(Player player) {
+        try {
+            org.bukkit.plugin.Plugin essentials = org.bukkit.Bukkit.getPluginManager().getPlugin("EssentialsPlus");
+            if (essentials == null || !essentials.isEnabled()) return false;
+            Method method = essentials.getClass().getMethod("isVanished", Player.class);
+            return Boolean.TRUE.equals(method.invoke(essentials, player));
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            return false;
+        }
+    }
+
+    private boolean containsVanishTag(String suffix) {
+        if (suffix == null || suffix.isBlank()) return false;
+        String plain = suffix.replaceAll("§[0-9A-FK-ORXx]", "");
+        return plain.toLowerCase(Locale.ROOT).contains("invisivel");
     }
 
     private void removeNametagDisplay(Player player) {
