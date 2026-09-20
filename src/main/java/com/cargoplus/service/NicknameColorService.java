@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class NicknameColorService {
     private static final String TEAM_PREFIX = "cp";
-    private static final java.util.Set<String> GLOWING_GROUPS = java.util.Set.of("dev", "adm", "gerente");
     private final CargoPlusColorConfig colors;
     private final PrefixAnimationService prefixAnimation;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
@@ -87,8 +86,13 @@ public final class NicknameColorService {
 
     private void applyCargoGlow(Player player, String group) {
         if (player == null || !player.isOnline()) return;
-        boolean glowing = group != null && GLOWING_GROUPS.contains(group.toLowerCase(Locale.ROOT));
-        player.setGlowing(glowing);
+        com.cargoplus.model.Group cargo = null;
+        // A flag do glow vem exclusivamente da configuração do cargo.
+        // Isso permite ligar/desligar o outline individualmente por cargo.
+        // A configuração de cor do Team continua definindo a cor do outline.
+        // O método apply() fornece o GroupService na aplicação completa; o
+        // estado será atualizado em ensureTeam(), onde o cargo já está disponível.
+        player.setGlowing(group != null);
     }
 
     public void remove(Player player) {
@@ -272,7 +276,7 @@ public final class NicknameColorService {
         // injeta uma cor legacy no entry do jogador.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        // O DEV usa outline vermelho fixo; os demais cargos continuam usando\n        // a aproximação legacy da cor final do gradient.\n        ChatColor glowColor = "dev".equalsIgnoreCase(group) ? ChatColor.RED : color;\n        team.setColor(glowColor);
+        // O DEV usa outline vermelho fixo; os demais cargos continuam usando\n        // a aproximação legacy da cor final do gradient.\n        com.cargoplus.model.Group cargo = groups.get(group);\n        ChatColor glowColor = cargo != null && cargo.glow() && "dev".equalsIgnoreCase(group)\n                ? ChatColor.RED\n                : color;\n        team.setColor(glowColor);\n        player.setGlowing(cargo != null && cargo.glow());
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
