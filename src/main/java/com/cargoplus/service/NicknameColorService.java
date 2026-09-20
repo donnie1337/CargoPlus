@@ -114,7 +114,7 @@ public final class NicknameColorService {
         // exact RGB that is the final color of the cargo gradient.
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
         if (display == null || !display.isValid()) {
-            display = player.getWorld().spawn(player.getLocation().add(0, 2.35, 0), TextDisplay.class);
+            display = player.getWorld().spawn(player.getLocation().add(0, 2.65, 0), TextDisplay.class);
             display.setBillboard(Display.Billboard.CENTER);
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
