@@ -7,6 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -125,6 +128,16 @@ public final class NicknameColorService {
             display.setPersistent(false);
             display.setViewRange(64.0f);
             player.addPassenger(display);
+            // Como o TextDisplay é passageiro, a posição usada no spawn é
+            // normalizada pelo Minecraft para o ponto de montagem do passageiro.
+            // O translation desloca a renderização acima da cabeça sem quebrar
+            // o acompanhamento do jogador.
+            display.setTransformation(new Transformation(
+                    new Vector3f(0.0f, 0.85f, 0.0f),
+                    new Quaternionf(),
+                    new Vector3f(1.0f, 1.0f, 1.0f),
+                    new Quaternionf()
+            ));
             nametagDisplays.put(player.getUniqueId(), display);
         }
 
