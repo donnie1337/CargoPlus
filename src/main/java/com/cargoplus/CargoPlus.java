@@ -62,7 +62,7 @@ public final class CargoPlus extends JavaPlugin {
             prefixAnimation = animation;
             nicknameColors = loadedNicknameColors;
             permissions = new PermissionService(this, storage, groups, loadedNicknameColors, loadedColors);
-            api = new CargoPlusAPI(permissions, groups, animation);
+            api = new CargoPlusAPI(permissions, groups, animation, loadedNicknameColors);
         } catch (Exception ex) {
             getLogger().severe("Falha ao carregar dados do CargoPlus: " + ex.getMessage());
             getServer().getPluginManager().disablePlugin(this);
