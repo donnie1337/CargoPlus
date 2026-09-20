@@ -38,7 +38,7 @@ public final class NicknameColorService {
         String rgbColor = resolveRgbColorInternal(user, groups);
         ChatColor legacyColor = resolveLegacyColor(rgbColor);
         player.setDisplayName(rgbColor + player.getName());
-        applyTeam(player, legacyColor, user.group(), groups);
+        applyTeam(player, legacyColor, rgbColor, user.group(), groups);
         refreshTabName(player, rgbColor);
     }
 
@@ -47,6 +47,7 @@ public final class NicknameColorService {
         var cargo = groups.get(group);
         if (cargo == null) return;
 
+        String rgbColor = resolveRgbColor(groups, group);
         Team team = ensureTeam(player, resolveColor(groups, group), group, groups);
         if (team == null) return;
 
@@ -57,6 +58,7 @@ public final class NicknameColorService {
         if (!safePrefix.equals(previousPrefix) || !team.hasEntry(player.getName())) {
             if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
             team.setPrefix(safePrefix);
+            renderCustomName(player, safePrefix, rgbColor);
         }
     }
 
@@ -75,17 +77,28 @@ public final class NicknameColorService {
             }
         }
         player.setDisplayName(player.getName());
+        player.setCustomName(null);
+        player.setCustomNameVisible(false);
         player.setPlayerListName(player.getName());
     }
 
-    private void applyTeam(Player player, ChatColor color, String group, GroupService groups) {
+    private void applyTeam(Player player, ChatColor color, String rgbColor, String group, GroupService groups) {
         Team team = ensureTeam(player, color, group, groups);
         if (team == null) return;
         String prefix = prefixAnimation.animate(groups.get(group).prefix(), group);
         String safePrefix = prefix == null ? "" : ChatColor.translateAlternateColorCodes('&', prefix);
         lastRenderedPrefixes.put(player.getUniqueId(), safePrefix);
         team.setPrefix(safePrefix);
+        renderCustomName(player, safePrefix, rgbColor);
         player.setCollidable(false);
+    }
+
+    private void renderCustomName(Player player, String prefix, String rgbColor) {
+        if (player == null) return;
+        String safePrefix = prefix == null ? "" : prefix;
+        String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
+        player.setCustomName(safePrefix + safeColor + player.getName());
+        player.setCustomNameVisible(true);
     }
 
     private Team ensureTeam(Player player, ChatColor color, String group, GroupService groups) {
@@ -116,10 +129,11 @@ public final class NicknameColorService {
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
 
-        // A cor do nickname acima da cabeça NÃO deve vir de Team#setColor().
-        // No Spigot, Team#setColor() é uma cor legacy e transforma o RGB em
-        // algo como &3. O prefixo continua usando suas próprias cores.
+        // O nametag vanilla é substituído pelo custom name para permitir RGB exato
+        // no nickname. O Team continua responsável pela ordenação/colisão, mas não
+        // injeta uma cor legacy no entry do jogador.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
