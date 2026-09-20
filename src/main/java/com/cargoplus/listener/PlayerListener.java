@@ -28,6 +28,7 @@ public final class PlayerListener implements Listener {
         Player player = event.getPlayer();
         event.setJoinMessage(null);
         plugin.permissions().remove(player);
+        plugin.nicknameColors().hideVanillaNametag(player);
         scheduleAuthenticationCheck(player);
     }
 
