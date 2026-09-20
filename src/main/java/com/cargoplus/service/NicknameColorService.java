@@ -22,6 +22,7 @@ public final class NicknameColorService {
     private final Map<UUID, String> lastRenderedPrefixes = new ConcurrentHashMap<>();
     private final Map<UUID, Object> preservedSuffixes = new ConcurrentHashMap<>();
     private final Map<UUID, TextDisplay> nametagDisplays = new ConcurrentHashMap<>();
+    private final Map<UUID, String> nametagSuffixes = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors, PrefixAnimationService prefixAnimation) {
         this.colors = colors;
@@ -69,6 +70,7 @@ public final class NicknameColorService {
         if (player == null) return;
         UUID uuid = player.getUniqueId();
         lastRenderedPrefixes.remove(uuid);
+        nametagSuffixes.remove(uuid);
         String teamName = teams.remove(uuid);
         if (teamName != null) {
             Scoreboard scoreboard = player.getScoreboard();
@@ -101,7 +103,8 @@ public final class NicknameColorService {
         if (player == null || !player.isOnline()) return;
         String safePrefix = prefix == null ? "" : prefix;
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
-        String renderedName = safePrefix + safeColor + player.getName();
+        String suffix = nametagSuffixes.getOrDefault(player.getUniqueId(), "");
+        String renderedName = safePrefix + safeColor + player.getName() + suffix;
 
         // Player#setCustomName() does not affect player nameplates on Spigot.
         // Use a TextDisplay as the visual nametag so the nickname can keep the
@@ -123,6 +126,21 @@ public final class NicknameColorService {
         }
 
         display.setText(renderedName);
+    }
+
+    public void setNametagSuffix(Player player, String suffix, String group, GroupService groups) {
+        if (player == null || !player.isOnline()) return;
+        nametagSuffixes.put(player.getUniqueId(), suffix == null ? "" : suffix);
+        String safeGroup = group;
+        if (safeGroup == null || safeGroup.isBlank()) safeGroup = "membro";
+        String prefix = lastRenderedPrefixes.get(player.getUniqueId());
+        if (prefix == null) {
+            var cargo = groups == null ? null : groups.get(safeGroup);
+            prefix = cargo == null ? "" : prefixAnimation.animate(cargo.prefix(), safeGroup);
+            prefix = prefix == null ? "" : ChatColor.translateAlternateColorCodes('&', prefix);
+        }
+        String rgbColor = resolveRgbColor(groups, safeGroup);
+        renderCustomName(player, prefix, rgbColor);
     }
 
     private void removeNametagDisplay(Player player) {
