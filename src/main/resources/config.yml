@@ -124,7 +124,7 @@ groups:
   administrador:
     display-name: "Administrador"
     glow: true
-    cor-glow: "#B71C1C"
+      cor-glow: "vermelho"
     prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
     # O nickname continua a partir da cor final do gradient (#B71C1C).
     name-color: "<cor:#B71C1C>"
