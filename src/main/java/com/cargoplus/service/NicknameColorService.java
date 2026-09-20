@@ -193,6 +193,12 @@ public final class NicknameColorService {
         String configuredRgb = parseRgbAlias(cargo.nameColor());
         if (configuredRgb != null) return configuredRgb;
 
+        // Cargos sem HEX podem usar uma cor nomeada do bloco chat.colors.
+        // Ex.: membro usa "cinza", então o nickname deve herdar exatamente &7
+        // no chat, TAB e no TextDisplay acima da cabeça.
+        ChatColor configuredNamedColor = colors.resolve(cargo.nameColor());
+        if (configuredNamedColor != null) return "§" + configuredNamedColor.getChar();
+
         String prefix = cargo.prefix();
         if (prefix == null || prefix.isBlank()) return "§f";
 
