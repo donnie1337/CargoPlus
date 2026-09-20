@@ -133,7 +133,7 @@ public final class NicknameColorService {
             // O translation desloca a renderização acima da cabeça sem quebrar
             // o acompanhamento do jogador.
             display.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.85f, 0.0f),
+                    new Vector3f(0.0f, 0.45f, 0.0f),
                     new Quaternionf(),
                     new Vector3f(1.0f, 1.0f, 1.0f),
                     new Quaternionf()
