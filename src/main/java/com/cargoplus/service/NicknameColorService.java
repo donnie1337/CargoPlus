@@ -29,7 +29,6 @@ public final class NicknameColorService {
         return user == null ? ChatColor.WHITE : resolveColor(groups, user.group());
     }
 
-    /** Retorna a cor exata do nickname em RGB, sem conversão para legacy. */
     public String resolveRgbColor(UserData user, GroupService groups) {
         return resolveRgbColorInternal(user, groups);
     }
@@ -55,8 +54,6 @@ public final class NicknameColorService {
         String safePrefix = animatedPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', animatedPrefix);
         String previousPrefix = lastRenderedPrefixes.put(player.getUniqueId(), safePrefix);
 
-        // Só envia uma atualização ao cliente quando o frame realmente mudou.
-        // Reescrever o Team a cada 2 ticks fazia a tag do TAB piscar.
         if (!safePrefix.equals(previousPrefix) || !team.hasEntry(player.getName())) {
             if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
             team.setPrefix(safePrefix);
@@ -118,7 +115,10 @@ public final class NicknameColorService {
 
         Team team = scoreboard.getTeam(teamName);
         if (team == null) team = scoreboard.registerNewTeam(teamName);
-        team.setColor(color);
+
+        // A cor do nickname acima da cabeça NÃO deve vir de Team#setColor().
+        // No Spigot, Team#setColor() é uma cor legacy e transforma o RGB em
+        // algo como &3. O prefixo continua usando suas próprias cores.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
@@ -176,11 +176,8 @@ public final class NicknameColorService {
         if (rgbColor == null || rgbColor.isBlank()) return ChatColor.WHITE;
         String hex = rgbColor.replace("§x", "").replace("§", "");
         if (hex.length() != 6) return ChatColor.WHITE;
-        try {
-            return nearestLegacyColor(Integer.parseInt(hex, 16));
-        } catch (NumberFormatException ignored) {
-            return ChatColor.WHITE;
-        }
+        try { return nearestLegacyColor(Integer.parseInt(hex, 16)); }
+        catch (NumberFormatException ignored) { return ChatColor.WHITE; }
     }
 
     private ChatColor nearestLegacyColor(int rgb) {
@@ -205,10 +202,7 @@ public final class NicknameColorService {
     private void preserveSuffix(Player player, Team team) {
         if (player == null || team == null) return;
         Object suffix = readPaperSuffix(team);
-        if (suffix != null) {
-            preservedSuffixes.put(player.getUniqueId(), suffix);
-            return;
-        }
+        if (suffix != null) { preservedSuffixes.put(player.getUniqueId(), suffix); return; }
         String legacySuffix = team.getSuffix();
         if (legacySuffix != null && !legacySuffix.isEmpty()) preservedSuffixes.put(player.getUniqueId(), legacySuffix);
     }
@@ -217,16 +211,11 @@ public final class NicknameColorService {
         try {
             Method method = team.getClass().getMethod("suffix");
             return method.invoke(team);
-        } catch (ReflectiveOperationException ignored) {
-            return null;
-        }
+        } catch (ReflectiveOperationException ignored) { return null; }
     }
 
     private void restoreSuffix(Team team, Object suffix) {
-        if (suffix instanceof String legacySuffix) {
-            team.setSuffix(legacySuffix);
-            return;
-        }
+        if (suffix instanceof String legacySuffix) { team.setSuffix(legacySuffix); return; }
         try {
             for (Method method : team.getClass().getMethods()) {
                 if (!method.getName().equals("suffix") || method.getParameterCount() != 1) continue;
@@ -234,16 +223,7 @@ public final class NicknameColorService {
                 method.invoke(team, suffix);
                 return;
             }
-        } catch (ReflectiveOperationException ignored) {
-            // Keep CargoPlus compatible with the Spigot API if Paper's
-            // Adventure suffix methods are not present at runtime.
-        }
-    }
-
-    private void writePrefix(Team team, String legacyPrefix) {
-        if (team == null) return;
-        String safe = legacyPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', legacyPrefix);
-        team.setPrefix(safe);
+        } catch (ReflectiveOperationException ignored) { }
     }
 
     private Team findTeam(Player player) {
