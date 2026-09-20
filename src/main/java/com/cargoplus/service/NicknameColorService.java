@@ -132,7 +132,8 @@ public final class NicknameColorService {
         if (isVanished(player) && !containsVanishTag(suffix)) {
             suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
-        String nametagColor = brightenNametagColor(safeColor);\n        String renderedName = safePrefix + nametagColor + player.getName() + suffix;
+        String nametagColor = brightenNametagColor(safeColor);
+        String renderedName = safePrefix + nametagColor + player.getName() + suffix;
 
         // Player#setCustomName() does not affect player nameplates on Spigot.
         // Use a TextDisplay as the visual nametag so the nickname can keep the
