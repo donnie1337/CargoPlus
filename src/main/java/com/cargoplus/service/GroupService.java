@@ -44,7 +44,7 @@ public final class GroupService {
             if (parents.size() > MAX_PARENTS_PER_GROUP) throw new IllegalStateException("Cargo " + name + " possui pais demais (maximo " + MAX_PARENTS_PER_GROUP + ").");
             List<String> permissions = normalizePermissions(section.getStringList(rawName + ".permissions"));
             if (permissions.size() > MAX_PERMISSIONS_PER_GROUP) throw new IllegalStateException("Cargo " + name + " possui permissoes demais (maximo " + MAX_PERMISSIONS_PER_GROUP + ").");
-            groups.put(name, new Group(name, section.getString(rawName + ".display-name", name), section.getBoolean(rawName + ".glow", false), section.getString(rawName + ".prefix", ""), normalizeColorName(section.getString(rawName + ".name-color", "branco")), permissions, parents));
+            groups.put(name, new Group(name, section.getString(rawName + ".display-name", name), section.getBoolean(rawName + ".glow", false), normalizeColorName(section.getString(rawName + ".cor-glow", "branco")), section.getString(rawName + ".prefix", ""), normalizeColorName(section.getString(rawName + ".name-color", "branco")), permissions, parents));
         }
         for (String group : hierarchy) if (!groups.containsKey(group)) throw new IllegalStateException("Cargo da hierarquia nao existe em groups: " + group);
         for (Group group : groups.values()) for (String parent : group.parents()) if (!groups.containsKey(parent)) throw new IllegalStateException("Cargo " + group.name() + " referencia pai inexistente: " + parent);
