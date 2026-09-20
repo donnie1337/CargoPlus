@@ -177,6 +177,8 @@ public final class CargoPlus extends JavaPlugin {
     public String getCargoColor(String group) { if (group == null || groups == null || chatColors == null) return ChatColor.WHITE.toString(); ChatColor color = chatColors.resolve(groups.nameColor(group)); return color == null ? ChatColor.WHITE.toString() : color.toString(); }
     public boolean receivesJoinQuitMessage(String group) { return groups != null && group != null && !groups.defaultGroup().equalsIgnoreCase(group.trim()); }
 
+    public NicknameColorService nicknameColors() { return nicknameColors; }
+
     public boolean isAuthenticated(Player player) {
         if (player == null || !player.isOnline()) return false;
         Plugin auth = getServer().getPluginManager().getPlugin("LoginPlus");
