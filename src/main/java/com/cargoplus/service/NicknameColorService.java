@@ -6,6 +6,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scoreboard.Scoreboard;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
@@ -132,9 +133,7 @@ public final class NicknameColorService {
         if (isVanished(player) && !containsVanishTag(suffix)) {
             suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
-        String nametagColor = brightenNametagColor(safeColor);
-        String renderedName = safePrefix + nametagColor + player.getName() + suffix;
-
+        // A nametag deve usar exatamente a cor final do cargo, sem clarear nem converter para uma cor legacy.\n        String renderedName = safePrefix + safeColor + player.getName() + suffix;\n
         // Player#setCustomName() does not affect player nameplates on Spigot.
         // Use a TextDisplay as the visual nametag so the nickname can keep the
         // exact RGB that is the final color of the cargo gradient.
@@ -171,7 +170,7 @@ public final class NicknameColorService {
         display.setShadowed(false);
         display.setBrightness(new Display.Brightness(15, 15));
         display.setSeeThrough(true);
-        display.setText(renderedName);
+        // TextDisplay deve receber um Component Adventure para que os códigos RGB §x sejam\n        // interpretados corretamente pelo cliente. setText(String) pode acabar renderizando\n        // a nametag inteira em branco dependendo da versão/API em uso.\n        display.text(LegacyComponentSerializer.legacySection().deserialize(renderedName));
         display.setTextOpacity((byte) 255);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
