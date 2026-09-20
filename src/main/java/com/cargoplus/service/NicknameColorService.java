@@ -80,6 +80,7 @@ public final class NicknameColorService {
         if (team == null) team = scoreboard.registerNewTeam(teamName);
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        team.setColor(color);
         if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
         player.setCustomName(null);
         player.setCustomNameVisible(false);
