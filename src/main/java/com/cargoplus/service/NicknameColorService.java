@@ -135,7 +135,7 @@ public final class NicknameColorService {
             display.setBillboard(Display.Billboard.CENTER);
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
-            display.setShadowed(false);
+            display.setShadowed(true);
             display.setBrightness(new Display.Brightness(15, 15));
             display.setSeeThrough(true);
             display.setGravity(false);
@@ -150,7 +150,7 @@ public final class NicknameColorService {
             display.setTransformation(new Transformation(
                     new Vector3f(0.0f, 0.25f, 0.0f),
                     new Quaternionf(),
-                    new Vector3f(1.0f, 1.0f, 1.0f),
+                    new Vector3f(1.15f, 1.15f, 1.15f),
                     new Quaternionf()
             ));
             nametagDisplays.put(player.getUniqueId(), display);
