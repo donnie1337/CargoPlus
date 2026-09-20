@@ -26,9 +26,7 @@ public final class NicknameColorService {
     }
 
     public ChatColor resolveColor(UserData user, GroupService groups) {
-        if (user == null || groups == null) return ChatColor.WHITE;
-        var cargo = groups.get(user.group());
-        return cargo == null ? ChatColor.WHITE : resolveGradientEndColor(cargo.prefix());
+        return user == null ? ChatColor.WHITE : resolveColor(groups, user.group());
     }
 
     public void apply(Player player, UserData user, GroupService groups) {
