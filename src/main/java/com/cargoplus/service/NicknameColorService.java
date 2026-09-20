@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scoreboard.Scoreboard;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
