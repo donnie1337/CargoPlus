@@ -29,9 +29,14 @@ public final class NicknameColorService {
         return user == null ? ChatColor.WHITE : resolveColor(groups, user.group());
     }
 
+    /** Retorna a cor exata do nickname em RGB, sem conversão para legacy. */
+    public String resolveRgbColor(UserData user, GroupService groups) {
+        return resolveRgbColorInternal(user, groups);
+    }
+
     public void apply(Player player, UserData user, GroupService groups) {
         if (player == null || !player.isOnline()) return;
-        String rgbColor = resolveRgbColor(user, groups);
+        String rgbColor = resolveRgbColorInternal(user, groups);
         ChatColor legacyColor = resolveLegacyColor(rgbColor);
         player.setDisplayName(rgbColor + player.getName());
         applyTeam(player, legacyColor, user.group(), groups);
@@ -132,7 +137,7 @@ public final class NicknameColorService {
         return resolveLegacyColor(resolveRgbColor(groups, group));
     }
 
-    private String resolveRgbColor(UserData user, GroupService groups) {
+    private String resolveRgbColorInternal(UserData user, GroupService groups) {
         return user == null ? "§f" : resolveRgbColor(groups, user.group());
     }
 
