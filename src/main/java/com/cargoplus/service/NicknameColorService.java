@@ -146,7 +146,7 @@ public final class NicknameColorService {
             display.setShadowed(false);
             display.setTextOpacity((byte) 100);
             display.setBrightness(new Display.Brightness(15, 15));
-            display.setSeeThrough(true);
+            display.setSeeThrough(false);
             display.setGravity(false);
             display.setInvulnerable(true);
             display.setPersistent(false);
