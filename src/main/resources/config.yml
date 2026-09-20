@@ -70,7 +70,7 @@ hierarchy:
 groups:
   membro:
     display-name: "Membro"
-    prefix: ""
+    glow: false\n    prefix: ""
     name-color: "cinza"
     permissions:
       - chatplus.local
@@ -81,7 +81,7 @@ groups:
     parents: []
   ajudante:
     display-name: "Ajudante"
-    prefix: "&l<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
+    glow: false\n    prefix: "&l<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
     # O nickname continua a partir da cor final do gradient (#FBC02D).
     name-color: "<cor:#FBC02D>"
     permissions:
@@ -100,7 +100,7 @@ groups:
       - membro
   moderador:
     display-name: "Moderador"
-    prefix: "&l<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
+    glow: false\n    prefix: "&l<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
     # O nickname continua a partir da cor final do gradient (#1B5E20).
     name-color: "<cor:#1B5E20>"
     permissions:
@@ -117,7 +117,7 @@ groups:
       - ajudante
   administrador:
     display-name: "Administrador"
-    prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
+    glow: true\n    prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
     # O nickname continua a partir da cor final do gradient (#B71C1C).
     name-color: "<cor:#B71C1C>"
     permissions:
@@ -135,7 +135,7 @@ groups:
       - moderador
   gerente:
     display-name: "Gerente"
-    prefix: "&l<gradient:#FFD54F:#FF8F00>[Gerente]</gradient> "
+    glow: true\n    prefix: "&l<gradient:#FFD54F:#FF8F00>[Gerente]</gradient> "
     name-color: "<cor:#FF8F00>"
     permissions:
       - chatplus.local
@@ -152,7 +152,7 @@ groups:
       - administrador
   dev:
     display-name: "ᴅᴇᴠ"
-    prefix: "&l<gradient:#8A2BE2:#2196F3>[ᴅᴇᴠ]</gradient> "
+    glow: true\n    prefix: "&l<gradient:#8A2BE2:#2196F3>[ᴅᴇᴠ]</gradient> "
     # O nickname continua a partir da cor final do gradient (#2196F3).
     name-color: "<cor:#2196F3>"
     permissions:
