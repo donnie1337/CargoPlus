@@ -145,6 +145,16 @@ public final class NicknameColorService {
         display.setText(renderedName);
         display.setTextOpacity(player.isSneaking() ? (byte) 50 : (byte) 100);
         refreshNametagVisibility(player, display);
+        scheduleNametagVisibilityRefresh(player, display);
+    }
+
+    private void scheduleNametagVisibilityRefresh(Player target, TextDisplay display) {
+        org.bukkit.plugin.Plugin cargoPlugin = org.bukkit.Bukkit.getPluginManager().getPlugin("CargoPlus");
+        if (cargoPlugin == null || !cargoPlugin.isEnabled()) return;
+        for (long delay : new long[]{1L, 3L, 6L}) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(cargoPlugin,
+                    () -> refreshNametagVisibility(target, display), delay);
+        }
     }
 
     /**
