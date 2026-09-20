@@ -69,6 +69,20 @@ public final class NicknameColorService {
         }
     }
 
+    /** Esconde a nametag vanilla enquanto o LoginPlus aguarda autenticacao. */
+    public void hideVanillaNametag(Player player) {
+        if (player == null || !player.isOnline()) return;
+        Scoreboard scoreboard = player.getScoreboard();
+        String teamName = "cp_auth_" + player.getUniqueId().toString().replace("-", "").substring(0, 12);
+        Team team = scoreboard.getTeam(teamName);
+        if (team == null) team = scoreboard.registerNewTeam(teamName);
+        team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
+        player.setCustomName(null);
+        player.setCustomNameVisible(false);
+    }
+
     public void remove(Player player) {
         if (player == null) return;
         UUID uuid = player.getUniqueId();
