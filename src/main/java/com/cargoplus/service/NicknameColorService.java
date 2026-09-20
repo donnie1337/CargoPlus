@@ -163,6 +163,7 @@ public final class NicknameColorService {
         // no nickname. O Team continua responsável pela ordenação/colisão, mas não
         // injeta uma cor legacy no entry do jogador.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
