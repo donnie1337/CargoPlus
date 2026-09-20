@@ -2,7 +2,9 @@ package com.cargoplus.service;
 
 import com.cargoplus.model.UserData;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -19,6 +21,7 @@ public final class NicknameColorService {
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
     private final Map<UUID, String> lastRenderedPrefixes = new ConcurrentHashMap<>();
     private final Map<UUID, Object> preservedSuffixes = new ConcurrentHashMap<>();
+    private final Map<UUID, TextDisplay> nametagDisplays = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors, PrefixAnimationService prefixAnimation) {
         this.colors = colors;
@@ -80,6 +83,7 @@ public final class NicknameColorService {
         player.setCustomName(null);
         player.setCustomNameVisible(false);
         player.setPlayerListName(player.getName());
+        removeNametagDisplay(player);
     }
 
     private void applyTeam(Player player, ChatColor color, String rgbColor, String group, GroupService groups) {
@@ -94,11 +98,37 @@ public final class NicknameColorService {
     }
 
     private void renderCustomName(Player player, String prefix, String rgbColor) {
-        if (player == null) return;
+        if (player == null || !player.isOnline()) return;
         String safePrefix = prefix == null ? "" : prefix;
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
-        player.setCustomName(safePrefix + safeColor + player.getName());
-        player.setCustomNameVisible(true);
+        String renderedName = safePrefix + safeColor + player.getName();
+
+        // Player#setCustomName() does not affect player nameplates on Spigot.
+        // Use a TextDisplay as the visual nametag so the nickname can keep the
+        // exact RGB that is the final color of the cargo gradient.
+        TextDisplay display = nametagDisplays.get(player.getUniqueId());
+        if (display == null || !display.isValid()) {
+            display = player.getWorld().spawn(player.getLocation().add(0, 2.35, 0), TextDisplay.class);
+            display.setBillboard(Display.Billboard.CENTER);
+            display.setDefaultBackground(false);
+            display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
+            display.setShadowed(false);
+            display.setSeeThrough(false);
+            display.setGravity(false);
+            display.setInvulnerable(true);
+            display.setPersistent(false);
+            display.setViewRange(64.0f);
+            player.addPassenger(display);
+            nametagDisplays.put(player.getUniqueId(), display);
+        }
+
+        display.setText(renderedName);
+    }
+
+    private void removeNametagDisplay(Player player) {
+        if (player == null) return;
+        TextDisplay display = nametagDisplays.remove(player.getUniqueId());
+        if (display != null && display.isValid()) display.remove();
     }
 
     private Team ensureTeam(Player player, ChatColor color, String group, GroupService groups) {
