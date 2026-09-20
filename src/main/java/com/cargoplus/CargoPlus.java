@@ -229,7 +229,7 @@ public final class CargoPlus extends JavaPlugin {
             newStorage.load();
             NicknameColorService newNicknameColors = new NicknameColorService(newChatColors, newAnimation);
             PermissionService newPermissions = new PermissionService(this, newStorage, newGroups, newNicknameColors, newChatColors);
-            CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups, newAnimation);
+            CargoPlusAPI newApi = new CargoPlusAPI(newPermissions, newGroups, newAnimation, newNicknameColors);
 
             PermissionService oldPermissions = permissions;
             stopAnimatedPrefixTask();
