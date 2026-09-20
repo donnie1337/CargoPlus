@@ -122,7 +122,7 @@ public final class NicknameColorService {
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
             display.setShadowed(false);
-            display.setSeeThrough(false);
+            display.setSeeThrough(true);
             display.setGravity(false);
             display.setInvulnerable(true);
             display.setPersistent(false);
@@ -142,6 +142,7 @@ public final class NicknameColorService {
         }
 
         display.setText(renderedName);
+        display.setTextOpacity(player.isSneaking() ? (byte) 50 : (byte) 100);
         refreshNametagVisibility(player, display);
     }
 
