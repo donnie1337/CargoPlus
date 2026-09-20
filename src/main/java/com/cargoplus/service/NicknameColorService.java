@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class NicknameColorService {
     private static final String TEAM_PREFIX = "cp";
+    private static final java.util.Set<String> GLOWING_GROUPS = java.util.Set.of("dev", "adm", "gerente");
     private final CargoPlusColorConfig colors;
     private final PrefixAnimationService prefixAnimation;
     private final Map<UUID, String> teams = new ConcurrentHashMap<>();
@@ -46,6 +47,7 @@ public final class NicknameColorService {
         ChatColor legacyColor = resolveLegacyColor(rgbColor);
         player.setDisplayName(rgbColor + player.getName());
         applyTeam(player, legacyColor, rgbColor, user.group(), groups);
+        applyCargoGlow(player, user.group());
         refreshTabName(player, rgbColor);
     }
 
@@ -83,6 +85,12 @@ public final class NicknameColorService {
         player.setCustomNameVisible(false);
     }
 
+    private void applyCargoGlow(Player player, String group) {
+        if (player == null || !player.isOnline()) return;
+        boolean glowing = group != null && GLOWING_GROUPS.contains(group.toLowerCase(Locale.ROOT));
+        player.setGlowing(glowing);
+    }
+
     public void remove(Player player) {
         if (player == null) return;
         UUID uuid = player.getUniqueId();
@@ -103,6 +111,7 @@ public final class NicknameColorService {
         player.setCustomNameVisible(false);
         player.setPlayerListName(player.getName());
         removeNametagDisplay(player);
+        player.setGlowing(false);
     }
 
     private void applyTeam(Player player, ChatColor color, String rgbColor, String group, GroupService groups) {
