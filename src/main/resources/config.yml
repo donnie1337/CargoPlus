@@ -71,7 +71,7 @@ groups:
   membro:
     display-name: "Membro"
     prefix: ""
-    name-color: "cinza"
+    name-color: "<cor:#AAAAAA>"
     permissions:
       - chatplus.local
       - chatplus.global
