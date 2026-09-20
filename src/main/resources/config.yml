@@ -82,7 +82,9 @@ groups:
   ajudante:
     display-name: "Ajudante"
     prefix: "&l<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
-    name-color: "amarelo"
+    # O nickname continua a partir da cor final do gradient (#FBC02D).
+    # O nickname continua a partir da cor final do gradient (#FF8F00).
+    name-color: "dourado"
     permissions:
       - chatplus.local
       - chatplus.staff
@@ -100,6 +102,7 @@ groups:
   moderador:
     display-name: "Moderador"
     prefix: "&l<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
+    # O nickname continua a partir da cor final do gradient (#1B5E20).
     name-color: "verde-escuro"
     permissions:
       - chatplus.local
@@ -116,7 +119,9 @@ groups:
   administrador:
     display-name: "Administrador"
     prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
-    name-color: "vermelho"
+    # O nickname continua a partir da cor final do gradient (#B71C1C).
+    # O nickname continua a partir da cor final do gradient (#2196F3).
+    name-color: "azul-claro"
     permissions:
       - chatplus.local
       - chatplus.global
