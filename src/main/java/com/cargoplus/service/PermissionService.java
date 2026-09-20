@@ -41,7 +41,7 @@ public final class PermissionService {
     }
     public String getGroup(UUID uuid) { return getUser(uuid).group(); }
     public String getPrefix(UUID uuid) { return groups.prefix(getGroup(uuid)); }
-    public String getNicknameColor(UUID uuid) { return nicknameColors.resolveColor(getUser(uuid), groups).toString(); }
+    public String getNicknameColor(UUID uuid) { return nicknameColors.resolveRgbColor(getUser(uuid), groups); }
     public String getChatColor(UUID uuid) {
         String color = getUser(uuid).chatColor();
         ChatColor resolved = chatColors.resolve(color);
