@@ -26,9 +26,9 @@ public final class NicknameColorService {
     }
 
     public ChatColor resolveColor(UserData user, GroupService groups) {
-        String groupColor = groups.nameColor(user.group());
-        ChatColor color = colors.resolve(groupColor);
-        return color == null ? ChatColor.WHITE : color;
+        if (user == null || groups == null) return ChatColor.WHITE;
+        var cargo = groups.get(user.group());
+        return cargo == null ? ChatColor.WHITE : resolveGradientEndColor(cargo.prefix());
     }
 
     public void apply(Player player, UserData user, GroupService groups) {
@@ -130,8 +130,39 @@ public final class NicknameColorService {
     }
 
     private ChatColor resolveColor(GroupService groups, String group) {
-        ChatColor color = colors.resolve(groups.nameColor(group));
-        return color == null ? ChatColor.WHITE : color;
+        if (groups == null || group == null) return ChatColor.WHITE;
+        var cargo = groups.get(group);
+        if (cargo == null) return ChatColor.WHITE;
+        return resolveGradientEndColor(cargo.prefix());
+    }
+
+    private ChatColor resolveGradientEndColor(String prefix) {
+        if (prefix == null || prefix.isBlank()) return ChatColor.WHITE;
+        var matcher = java.util.regex.Pattern
+                .compile("<gradient:(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6})>")
+                .matcher(prefix);
+        if (!matcher.find()) return ChatColor.WHITE;
+        int rgb = Integer.parseInt(matcher.group(2).substring(1), 16);
+        return nearestLegacyColor(rgb);
+    }
+
+    private ChatColor nearestLegacyColor(int rgb) {
+        int r = (rgb >> 16) & 0xFF, g = (rgb >> 8) & 0xFF, b = rgb & 0xFF;
+        ChatColor[] palette = { ChatColor.BLACK, ChatColor.DARK_BLUE, ChatColor.DARK_GREEN, ChatColor.DARK_AQUA,
+                ChatColor.DARK_RED, ChatColor.DARK_PURPLE, ChatColor.GOLD, ChatColor.GRAY, ChatColor.DARK_GRAY,
+                ChatColor.BLUE, ChatColor.GREEN, ChatColor.AQUA, ChatColor.RED, ChatColor.LIGHT_PURPLE,
+                ChatColor.YELLOW, ChatColor.WHITE };
+        int[] values = { 0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA,
+                0x555555, 0x5555FF, 0x55FF55, 0x55FFFF, 0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF };
+        int bestDistance = Integer.MAX_VALUE;
+        ChatColor best = ChatColor.WHITE;
+        for (int i = 0; i < palette.length; i++) {
+            int pr = (values[i] >> 16) & 0xFF, pg = (values[i] >> 8) & 0xFF, pb = values[i] & 0xFF;
+            int dr = r - pr, dg = g - pg, db = b - pb;
+            int distance = dr * dr + dg * dg + db * db;
+            if (distance < bestDistance) { bestDistance = distance; best = palette[i]; }
+        }
+        return best;
     }
 
     private void preserveSuffix(Player player, Team team) {
