@@ -33,10 +33,11 @@ public final class NicknameColorService {
 
     public void apply(Player player, UserData user, GroupService groups) {
         if (player == null || !player.isOnline()) return;
-        ChatColor color = resolveColor(user, groups);
-        player.setDisplayName(color + player.getName());
-        applyTeam(player, color, user.group(), groups);
-        refreshTabName(player, color);
+        String rgbColor = resolveRgbColor(user, groups);
+        ChatColor legacyColor = resolveLegacyColor(rgbColor);
+        player.setDisplayName(rgbColor + player.getName());
+        applyTeam(player, legacyColor, user.group(), groups);
+        refreshTabName(player, rgbColor);
     }
 
     public void refreshAnimatedPrefix(Player player, String group, GroupService groups) {
@@ -124,26 +125,59 @@ public final class NicknameColorService {
         return team;
     }
 
-    private void refreshTabName(Player player, ChatColor color) {
+    private void refreshTabName(Player player, String color) {
         if (player == null || !player.isOnline()) return;
         player.setPlayerListName(color + player.getName());
     }
 
     private ChatColor resolveColor(GroupService groups, String group) {
-        if (groups == null || group == null) return ChatColor.WHITE;
-        var cargo = groups.get(group);
-        if (cargo == null) return ChatColor.WHITE;
-        return resolveGradientEndColor(cargo.prefix());
+        return resolveLegacyColor(resolveRgbColor(groups, group));
     }
 
-    private ChatColor resolveGradientEndColor(String prefix) {
-        if (prefix == null || prefix.isBlank()) return ChatColor.WHITE;
+    private String resolveRgbColor(UserData user, GroupService groups) {
+        return user == null ? "§f" : resolveRgbColor(groups, user.group());
+    }
+
+    private String resolveRgbColor(GroupService groups, String group) {
+        if (groups == null || group == null) return "§f";
+        var cargo = groups.get(group);
+        if (cargo == null) return "§f";
+
+        String configuredRgb = parseRgbAlias(cargo.nameColor());
+        if (configuredRgb != null) return configuredRgb;
+
+        String prefix = cargo.prefix();
+        if (prefix == null || prefix.isBlank()) return "§f";
+
         var matcher = java.util.regex.Pattern
                 .compile("<gradient:(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6})>")
                 .matcher(prefix);
-        if (!matcher.find()) return ChatColor.WHITE;
-        int rgb = Integer.parseInt(matcher.group(2).substring(1), 16);
-        return nearestLegacyColor(rgb);
+        if (!matcher.find()) return "§f";
+        return toSectionSignHex(matcher.group(2));
+    }
+
+    private String parseRgbAlias(String value) {
+        if (value == null) return null;
+        var matcher = java.util.regex.Pattern.compile("<cor:(#[0-9a-fA-F]{6})>").matcher(value.trim());
+        return matcher.matches() ? toSectionSignHex(matcher.group(1)) : null;
+    }
+
+    private String toSectionSignHex(String hex) {
+        String clean = hex.substring(1).toUpperCase(Locale.ROOT);
+        StringBuilder builder = new StringBuilder("§x");
+        for (char c : clean.toCharArray()) builder.append('§').append(c);
+        return builder.toString();
+    }
+
+    private ChatColor resolveLegacyColor(String rgbColor) {
+        if (rgbColor == null || rgbColor.isBlank()) return ChatColor.WHITE;
+        String hex = rgbColor.replace("§x", "").replace("§", "");
+        if (hex.length() != 6) return ChatColor.WHITE;
+        try {
+            return nearestLegacyColor(Integer.parseInt(hex, 16));
+        } catch (NumberFormatException ignored) {
+            return ChatColor.WHITE;
+        }
     }
 
     private ChatColor nearestLegacyColor(int rgb) {
