@@ -143,7 +143,7 @@ public final class NicknameColorService {
         }
 
         display.setText(renderedName);
-        display.setTextOpacity(player.isSneaking() ? (byte) 25 : (byte) 100);
+        display.setTextOpacity(player.isSneaking() ? (byte) 40 : (byte) 100);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
     }
