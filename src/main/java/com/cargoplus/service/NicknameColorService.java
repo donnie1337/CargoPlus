@@ -142,6 +142,28 @@ public final class NicknameColorService {
         }
 
         display.setText(renderedName);
+        refreshNametagVisibility(player, display);
+    }
+
+    /**
+     * O /v do EssentialsPlus esconde a entidade Player, mas esta nametag é um
+     * TextDisplay separado. Portanto, quando o jogador está invisível, o
+     * TextDisplay também precisa ser escondido dos espectadores sem permissão.
+     */
+    private void refreshNametagVisibility(Player target, TextDisplay display) {
+        if (target == null || display == null || !display.isValid()) return;
+
+        org.bukkit.plugin.Plugin cargoPlugin = org.bukkit.Bukkit.getPluginManager().getPlugin("CargoPlus");
+        if (cargoPlugin == null || !cargoPlugin.isEnabled()) return;
+
+        boolean vanished = isVanished(target);
+        for (Player viewer : org.bukkit.Bukkit.getOnlinePlayers()) {
+            if (viewer.equals(target) || !vanished || viewer.hasPermission("essentialsplus.vanish")) {
+                viewer.showEntity(cargoPlugin, display);
+            } else {
+                viewer.hideEntity(cargoPlugin, display);
+            }
+        }
     }
 
     public void setNametagSuffix(Player player, String suffix, String group, GroupService groups) {
