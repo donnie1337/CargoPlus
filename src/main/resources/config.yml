@@ -71,6 +71,7 @@ groups:
   membro:
     display-name: "Membro"
     glow: false
+    cor-glow: "#B0B0B0"
     prefix: ""
     name-color: "cinza"
     permissions:
@@ -83,6 +84,7 @@ groups:
   ajudante:
     display-name: "Ajudante"
     glow: false
+    cor-glow: "#FBC02D"
     prefix: "&l<gradient:#FFF176:#FBC02D>[Ajudante]</gradient> "
     # O nickname continua a partir da cor final do gradient (#FBC02D).
     name-color: "<cor:#FBC02D>"
@@ -103,6 +105,7 @@ groups:
   moderador:
     display-name: "Moderador"
     glow: false
+    cor-glow: "#1B5E20"
     prefix: "&l<gradient:#66BB6A:#1B5E20>[Moderador]</gradient> "
     # O nickname continua a partir da cor final do gradient (#1B5E20).
     name-color: "<cor:#1B5E20>"
@@ -121,6 +124,7 @@ groups:
   administrador:
     display-name: "Administrador"
     glow: true
+    cor-glow: "#B71C1C"
     prefix: "&l<gradient:#EF5350:#B71C1C>[ADM]</gradient> "
     # O nickname continua a partir da cor final do gradient (#B71C1C).
     name-color: "<cor:#B71C1C>"
@@ -140,6 +144,7 @@ groups:
   gerente:
     display-name: "Gerente"
     glow: true
+    cor-glow: "#FF8F00"
     prefix: "&l<gradient:#FFD54F:#FF8F00>[Gerente]</gradient> "
     name-color: "<cor:#FF8F00>"
     permissions:
@@ -158,6 +163,7 @@ groups:
   dev:
     display-name: "ᴅᴇᴠ"
     glow: true
+    cor-glow: "#2196F3"
     prefix: "&l<gradient:#8A2BE2:#2196F3>[ᴅᴇᴠ]</gradient> "
     # O nickname continua a partir da cor final do gradient (#2196F3).
     name-color: "<cor:#2196F3>"
