@@ -46,7 +46,7 @@ public final class NicknameColorService {
         ChatColor legacyColor = resolveLegacyColor(rgbColor);
         player.setDisplayName(rgbColor + player.getName());
         applyTeam(player, legacyColor, rgbColor, user.group(), groups);
-        applyCargoGlow(player, user.group());
+        applyCargoGlow(player, user.group(), groups);
         refreshTabName(player, rgbColor);
     }
 
@@ -84,15 +84,10 @@ public final class NicknameColorService {
         player.setCustomNameVisible(false);
     }
 
-    private void applyCargoGlow(Player player, String group) {
-        if (player == null || !player.isOnline()) return;
-        com.cargoplus.model.Group cargo = null;
-        // A flag do glow vem exclusivamente da configuração do cargo.
-        // Isso permite ligar/desligar o outline individualmente por cargo.
-        // A configuração de cor do Team continua definindo a cor do outline.
-        // O método apply() fornece o GroupService na aplicação completa; o
-        // estado será atualizado em ensureTeam(), onde o cargo já está disponível.
-        player.setGlowing(group != null);
+    private void applyCargoGlow(Player player, String group, GroupService groups) {
+        if (player == null || !player.isOnline() || groups == null) return;
+        com.cargoplus.model.Group cargo = groups.get(group);
+        player.setGlowing(cargo != null && cargo.glow());
     }
 
     public void remove(Player player) {
