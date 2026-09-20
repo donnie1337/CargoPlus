@@ -285,6 +285,18 @@ public final class NicknameColorService {
         player.setPlayerListName(color + player.getName());
     }
 
+    private ChatColor resolveGlowColor(String configured, ChatColor fallback) {
+        if (configured == null || configured.isBlank()) return fallback;
+        ChatColor named = colors.resolve(configured);
+        if (named != null) return named;
+        String normalized = configured.trim();
+        if (normalized.startsWith("#") && normalized.length() == 7) {
+            try { return nearestLegacyColor(Integer.parseInt(normalized.substring(1), 16)); }
+            catch (NumberFormatException ignored) { }
+        }
+        return fallback;
+    }
+
     private ChatColor resolveColor(GroupService groups, String group) {
         return resolveLegacyColor(resolveRgbColor(groups, group));
     }
