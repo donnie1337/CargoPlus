@@ -144,7 +144,7 @@ public final class NicknameColorService {
             display.setBillboard(Display.Billboard.CENTER);
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
-            display.setShadowed(false);
+            display.setShadowed(true);
             display.setTextOpacity((byte) 100);
             display.setBrightness(new Display.Brightness(15, 15));
             display.setSeeThrough(false);
