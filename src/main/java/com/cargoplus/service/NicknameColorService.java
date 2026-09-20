@@ -108,7 +108,7 @@ public final class NicknameColorService {
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
         String suffix = nametagSuffixes.getOrDefault(player.getUniqueId(), "");
         if (isVanished(player) && !containsVanishTag(suffix)) {
-            suffix = suffix + "\n" + safeColor + "[ɪɴᴠɪsɪᴠᴇʟ]";
+            suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
         String renderedName = safePrefix + safeColor + player.getName() + suffix;
 
