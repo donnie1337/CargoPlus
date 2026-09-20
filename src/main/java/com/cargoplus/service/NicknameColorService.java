@@ -132,7 +132,7 @@ public final class NicknameColorService {
         if (isVanished(player) && !containsVanishTag(suffix)) {
             suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
-        String renderedName = safePrefix + safeColor + player.getName() + suffix;
+        String nametagColor = brightenNametagColor(safeColor);\n        String renderedName = safePrefix + nametagColor + player.getName() + suffix;
 
         // Player#setCustomName() does not affect player nameplates on Spigot.
         // Use a TextDisplay as the visual nametag so the nickname can keep the
@@ -335,6 +335,36 @@ public final class NicknameColorService {
         if (!matcher.find()) return "§f";
         return toSectionSignHex(matcher.group(2));
     }
+    private String brightenNametagColor(String color) {
+        if (color == null || color.isBlank()) return "§f";
+        String hex = null;
+        String normalized = color.replace("§x", "").replace("§", "");
+        if (normalized.length() == 6 && normalized.matches("[0-9A-Fa-f]{6}")) {
+            hex = normalized;
+        } else {
+            ChatColor legacy = resolveLegacyColor(color);
+            if (legacy != null) {
+                int rgb = switch (legacy) {
+                    case BLACK -> 0x000000; case DARK_BLUE -> 0x0000AA; case DARK_GREEN -> 0x00AA00;
+                    case DARK_AQUA -> 0x00AAAA; case DARK_RED -> 0xAA0000; case DARK_PURPLE -> 0xAA00AA;
+                    case GOLD -> 0xFFAA00; case GRAY -> 0xAAAAAA; case DARK_GRAY -> 0x555555;
+                    case BLUE -> 0x5555FF; case GREEN -> 0x55FF55; case AQUA -> 0x55FFFF;
+                    case RED -> 0xFF5555; case LIGHT_PURPLE -> 0xFF55FF; case YELLOW -> 0xFFFF55;
+                    default -> 0xFFFFFF;
+                };
+                hex = String.format(Locale.ROOT, "%06X", rgb);
+            }
+        }
+        if (hex == null) return color;
+        int rgb = Integer.parseInt(hex, 16);
+        int r = (rgb >> 16) & 0xFF, g = (rgb >> 8) & 0xFF, b = rgb & 0xFF;
+        r = r + (255 - r) * 35 / 100;
+        g = g + (255 - g) * 35 / 100;
+        b = b + (255 - b) * 35 / 100;
+        return String.format(Locale.ROOT, "§x§%x§%x§%x§%x§%x§%x",
+                (r >> 4) & 0xF, r & 0xF, (g >> 4) & 0xF, g & 0xF, (b >> 4) & 0xF, b & 0xF);
+    }
+
     private String parseRgbAlias(String value) {
         if (value == null) return null;
         var matcher = java.util.regex.Pattern.compile("<cor:(#[0-9a-fA-F]{6})>").matcher(value.trim());
