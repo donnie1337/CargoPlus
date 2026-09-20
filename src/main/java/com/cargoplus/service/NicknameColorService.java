@@ -6,7 +6,9 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scoreboard.Scoreboard;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
@@ -170,10 +172,69 @@ public final class NicknameColorService {
         display.setShadowed(false);
         display.setBrightness(new Display.Brightness(15, 15));
         display.setSeeThrough(true);
-        // TextDisplay deve receber um Component Adventure para que os códigos RGB §x sejam\n        // interpretados corretamente pelo cliente. setText(String) pode acabar renderizando\n        // a nametag inteira em branco dependendo da versão/API em uso.\n        display.text(LegacyComponentSerializer.legacySection().deserialize(renderedName));
+        // TextDisplay deve receber um Component Adventure para que os códigos RGB §x sejam\n        // interpretados corretamente pelo cliente. setText(String) pode acabar renderizando\n        // a nametag inteira em branco dependendo da versão/API em uso.\n        display.text(toAdventureComponent(renderedName));
         display.setTextOpacity((byte) 255);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
+    }
+
+    private Component toAdventureComponent(String text) {
+        Component root = Component.empty();
+        if (text == null || text.isEmpty()) return root;
+
+        TextColor currentColor = TextColor.color(0xFFFFFF);
+        boolean bold = false;
+
+        for (int i = 0; i < text.length();) {
+            char ch = text.charAt(i);
+            if (ch == '§' && i + 1 < text.length()) {
+                char code = text.charAt(i + 1);
+                if (code == 'x' && i + 13 < text.length()) {
+                    StringBuilder hex = new StringBuilder(6);
+                    boolean valid = true;
+                    for (int j = 0; j < 6; j++) {
+                        int pos = i + 2 + (j * 2) + 1;
+                        if (pos >= text.length() || text.charAt(i + 2 + (j * 2)) != '§') {
+                            valid = false;
+                            break;
+                        }
+                        hex.append(text.charAt(pos));
+                    }
+                    if (valid) {
+                        try {
+                            currentColor = TextColor.fromHexString("#" + hex);
+                            i += 14;
+                            continue;
+                        } catch (IllegalArgumentException ignored) {
+                        }
+                    }
+                } else {
+                    org.bukkit.ChatColor legacy = org.bukkit.ChatColor.getByChar(code);
+                    if (legacy != null) {
+                        if (legacy == org.bukkit.ChatColor.BOLD) {
+                            bold = true;
+                        } else if (legacy == org.bukkit.ChatColor.RESET) {
+                            currentColor = TextColor.color(0xFFFFFF);
+                            bold = false;
+                        } else if (legacy.isColor()) {
+                            currentColor = TextColor.color(legacy.asBungee().getColor().getRGB());
+                        }
+                        i += 2;
+                        continue;
+                    }
+                }
+            }
+
+            int start = i;
+            while (i < text.length() && text.charAt(i) != '§') i++;
+            String part = text.substring(start, i);
+            if (!part.isEmpty()) {
+                Component piece = Component.text(part).color(currentColor);
+                if (bold) piece = piece.decorate(TextDecoration.BOLD);
+                root = root.append(piece);
+            }
+        }
+        return root;
     }
 
     private void scheduleNametagVisibilityRefresh(Player target, TextDisplay display) {
