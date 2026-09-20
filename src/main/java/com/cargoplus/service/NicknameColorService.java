@@ -271,7 +271,7 @@ public final class NicknameColorService {
         // injeta uma cor legacy no entry do jogador.
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        // O DEV usa outline vermelho fixo; os demais cargos continuam usando\n        // a aproximação legacy da cor final do gradient.\n        com.cargoplus.model.Group cargo = groups.get(group);\n        ChatColor glowColor = cargo != null && cargo.glow() && "dev".equalsIgnoreCase(group)\n                ? ChatColor.RED\n                : color;\n        team.setColor(glowColor);\n        player.setGlowing(cargo != null && cargo.glow());
+        com.cargoplus.model.Group cargo = groups.get(group);\n        ChatColor glowColor = cargo == null ? color : resolveGlowColor(cargo.glowColor(), color);\n        team.setColor(glowColor);\n        player.setGlowing(cargo != null && cargo.glow());
 
         Object preservedSuffix = preservedSuffixes.remove(player.getUniqueId());
         if (preservedSuffix != null) restoreSuffix(team, preservedSuffix);
