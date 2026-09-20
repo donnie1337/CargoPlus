@@ -70,8 +70,6 @@ hierarchy:
 groups:
   membro:
     display-name: "Membro"
-    glow: false
-    cor-glow: "#B0B0B0"
     prefix: ""
     name-color: "cinza"
     permissions:
