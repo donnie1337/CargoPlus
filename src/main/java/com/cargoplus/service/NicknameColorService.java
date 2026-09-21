@@ -154,7 +154,7 @@ public final class NicknameColorService {
             // O passageiro é reposicionado pelo Minecraft no ponto de montagem da cabeça.
             // Esta translação mantém a nametag acima da cabeça, sem deixá-la dentro do corpo.
             display.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.45f, 0.0f),
+                    new Vector3f(0.0f, 0.30f, 0.0f),
                     new Quaternionf(),
                     new Vector3f(1.0f, 1.0f, 1.0f),
                     new Quaternionf()
