@@ -175,6 +175,7 @@ groups:
       - cargoplus.setcargo
       - cargoplus.removercargo
       - cargoplus.admin
+      - performanceplus.admin
       - chatplus.cor
       - utilidadesplus.plugins
       - utilidadesplus.configurar
