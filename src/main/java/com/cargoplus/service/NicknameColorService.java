@@ -141,29 +141,19 @@ public final class NicknameColorService {
         // exact RGB that is the final color of the cargo gradient.
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
         if (display == null || !display.isValid()) {
-            display = player.getWorld().spawn(player.getLocation().add(0, 3.0, 0), TextDisplay.class);
+            display = player.getWorld().spawn(player.getLocation().add(0, 2.35, 0), TextDisplay.class);
             display.setBillboard(Display.Billboard.CENTER);
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
-            display.setShadowed(true);
+            display.setShadowed(false);
             display.setTextOpacity((byte) 255);
             display.setBrightness(new Display.Brightness(15, 15));
-            display.setSeeThrough(true);
+            display.setSeeThrough(false);
             display.setGravity(false);
             display.setInvulnerable(true);
             display.setPersistent(false);
             display.setViewRange(64.0f);
             player.addPassenger(display);
-            // Como o TextDisplay é passageiro, a posição usada no spawn é
-            // normalizada pelo Minecraft para o ponto de montagem do passageiro.
-            // O translation desloca a renderização acima da cabeça sem quebrar
-            // o acompanhamento do jogador.
-            display.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.25f, 0.0f),
-                    new Quaternionf(),
-                    new Vector3f(1.15f, 1.15f, 1.15f),
-                    new Quaternionf()
-            ));
             nametagDisplays.put(player.getUniqueId(), display);
         }
 
