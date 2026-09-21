@@ -129,16 +129,16 @@ public final class NicknameColorService {
 
     private void renderCustomName(Player player, String prefix, String rgbColor) {
         if (player == null || !player.isOnline()) return;
+
         String safePrefix = prefix == null ? "" : prefix;
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
         String suffix = nametagSuffixes.getOrDefault(player.getUniqueId(), "");
         if (isVanished(player) && !containsVanishTag(suffix)) {
             suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
-        // A nametag deve usar exatamente a cor final do cargo, sem clarear nem converter para uma cor legacy.\n        String renderedName = safePrefix + safeColor + player.getName() + suffix;\n
-        // Player#setCustomName() does not affect player nameplates on Spigot.
-        // Use a TextDisplay as the visual nametag so the nickname can keep the
-        // exact RGB that is the final color of the cargo gradient.
+
+        String renderedName = safePrefix + safeColor + player.getName() + suffix;
+
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
         if (display == null || !display.isValid()) {
             display = player.getWorld().spawn(player.getLocation().add(0, 2.35, 0), TextDisplay.class);
@@ -146,8 +146,6 @@ public final class NicknameColorService {
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
             display.setShadowed(false);
-            display.setTextOpacity((byte) 255);
-            display.setBrightness(new Display.Brightness(15, 15));
             display.setSeeThrough(false);
             display.setGravity(false);
             display.setInvulnerable(true);
@@ -160,10 +158,12 @@ public final class NicknameColorService {
         display.setDefaultBackground(false);
         display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
         display.setShadowed(false);
-        display.setBrightness(new Display.Brightness(15, 15));
-        display.setSeeThrough(true);
-        // TextDisplay deve receber um Component Adventure para que os códigos RGB §x sejam\n        // interpretados corretamente pelo cliente. setText(String) pode acabar renderizando\n        // a nametag inteira em branco dependendo da versão/API em uso.\n        display.text(toAdventureComponent(renderedName));
+        display.setSeeThrough(false);
+        display.setGravity(false);
         display.setTextOpacity((byte) 255);
+        display.setBrightness(new Display.Brightness(15, 15));
+        display.setViewRange(64.0f);
+        display.setText(renderedName);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
     }
