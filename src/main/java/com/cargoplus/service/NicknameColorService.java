@@ -146,7 +146,7 @@ public final class NicknameColorService {
             display.setDefaultBackground(false);
             display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
             display.setShadowed(false);
-            display.setSeeThrough(false);
+            display.setSeeThrough(true);
             display.setGravity(false);
             display.setInvulnerable(true);
             display.setPersistent(false);
@@ -166,9 +166,9 @@ public final class NicknameColorService {
         display.setDefaultBackground(false);
         display.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
         display.setShadowed(false);
-        display.setSeeThrough(false);
+        display.setSeeThrough(true);
         display.setGravity(false);
-        display.setTextOpacity((byte) 255);
+        display.setTextOpacity((byte) (player.isSneaking() ? 100 : 255));
         display.setBrightness(new Display.Brightness(15, 15));
         display.setViewRange(64.0f);
         display.setText(renderedName);
@@ -263,6 +263,13 @@ public final class NicknameColorService {
                 viewer.hideEntity(cargoPlugin, display);
             }
         }
+    }
+
+    public void updateSneakOpacity(Player player) {
+        if (player == null) return;
+        TextDisplay display = nametagDisplays.get(player.getUniqueId());
+        if (display == null || !display.isValid()) return;
+        display.setTextOpacity((byte) (player.isSneaking() ? 100 : 255));
     }
 
     public void setNametagSuffix(Player player, String suffix, String group, GroupService groups) {
