@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -58,6 +59,11 @@ public final class PlayerListener implements Listener {
                 }
             }
         }, timeoutTicks);
+    }
+
+    @EventHandler
+    public void onSneak(PlayerToggleSneakEvent event) {
+        plugin.nicknameColors().updateSneakOpacity(event.getPlayer());
     }
 
     @EventHandler
