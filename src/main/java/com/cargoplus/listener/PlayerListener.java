@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -59,6 +60,21 @@ public final class PlayerListener implements Listener {
                 }
             }
         }, timeoutTicks);
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!player.isOnline() || !plugin.isAuthenticated(player)) {
+                return;
+            }
+            plugin.nicknameColors().refreshAnimatedPrefix(
+                    player,
+                    plugin.permissions().getGroup(player.getUniqueId()),
+                    plugin.groups()
+            );
+        });
     }
 
     @EventHandler

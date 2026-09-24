@@ -66,7 +66,9 @@ public final class NicknameColorService {
         String safePrefix = animatedPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', animatedPrefix);
         String previousPrefix = lastRenderedPrefixes.put(player.getUniqueId(), safePrefix);
 
-        if (!safePrefix.equals(previousPrefix) || !team.hasEntry(player.getName())) {
+        if (!safePrefix.equals(previousPrefix)
+                || !team.hasEntry(player.getName())
+                || nametagDisplayNeedsRefresh(player)) {
             if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
             team.setPrefix(safePrefix);
             renderCustomName(player, safePrefix, rgbColor);
@@ -140,7 +142,14 @@ public final class NicknameColorService {
         String renderedName = safePrefix + safeColor + player.getName() + suffix;
 
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
-        if (display == null || !display.isValid()) {
+        if (display != null && (!display.isValid()
+                || display.getWorld() != player.getWorld()
+                || display.getVehicle() != player)) {
+            display.remove();
+            nametagDisplays.remove(player.getUniqueId(), display);
+            display = null;
+        }
+        if (display == null) {
             display = player.getWorld().spawn(player.getLocation().add(0, 2.35, 0), TextDisplay.class);
             display.setBillboard(Display.Billboard.CENTER);
             display.setDefaultBackground(false);
@@ -174,6 +183,14 @@ public final class NicknameColorService {
         display.setText(renderedName);
         refreshNametagVisibility(player, display);
         scheduleNametagVisibilityRefresh(player, display);
+    }
+
+    private boolean nametagDisplayNeedsRefresh(Player player) {
+        TextDisplay display = nametagDisplays.get(player.getUniqueId());
+        return display == null
+                || !display.isValid()
+                || display.getWorld() != player.getWorld()
+                || display.getVehicle() != player;
     }
 
     private Component toAdventureComponent(String text) {
