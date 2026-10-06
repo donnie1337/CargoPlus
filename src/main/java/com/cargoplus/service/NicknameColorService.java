@@ -29,6 +29,7 @@ public final class NicknameColorService {
     private final Map<UUID, Object> preservedSuffixes = new ConcurrentHashMap<>();
     private final Map<UUID, TextDisplay> nametagDisplays = new ConcurrentHashMap<>();
     private final Map<UUID, String> nametagSuffixes = new ConcurrentHashMap<>();
+    private final Map<UUID, String> nametagExtraPrefixes = new ConcurrentHashMap<>();
 
     public NicknameColorService(CargoPlusColorConfig colors, PrefixAnimationService prefixAnimation) {
         this.colors = colors;
@@ -100,6 +101,7 @@ public final class NicknameColorService {
         UUID uuid = player.getUniqueId();
         lastRenderedPrefixes.remove(uuid);
         nametagSuffixes.remove(uuid);
+        nametagExtraPrefixes.remove(uuid);
         String teamName = teams.remove(uuid);
         if (teamName != null) {
             Scoreboard scoreboard = player.getScoreboard();
@@ -133,13 +135,14 @@ public final class NicknameColorService {
         if (player == null || !player.isOnline()) return;
 
         String safePrefix = prefix == null ? "" : prefix;
+        String extraPrefix = nametagExtraPrefixes.getOrDefault(player.getUniqueId(), "");
         String safeColor = rgbColor == null || rgbColor.isBlank() ? "§f" : rgbColor;
         String suffix = nametagSuffixes.getOrDefault(player.getUniqueId(), "");
         if (isVanished(player) && !containsVanishTag(suffix)) {
             suffix = suffix + "\n§7[ɪɴᴠɪsɪᴠᴇʟ]";
         }
 
-        String renderedName = safePrefix + safeColor + player.getName() + suffix;
+        String renderedName = extraPrefix + safePrefix + safeColor + player.getName() + suffix;
 
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
         if (display != null && (!display.isValid()
@@ -287,6 +290,21 @@ public final class NicknameColorService {
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
         if (display == null || !display.isValid()) return;
         display.setTextOpacity((byte) (player.isSneaking() ? 100 : 255));
+    }
+
+    public void setNametagExtraPrefix(Player player, String prefix, String group, GroupService groups) {
+        if (player == null || !player.isOnline()) return;
+        nametagExtraPrefixes.put(player.getUniqueId(), prefix == null ? "" : prefix);
+        String safeGroup = group;
+        if (safeGroup == null || safeGroup.isBlank()) safeGroup = "membro";
+        String cargoPrefix = lastRenderedPrefixes.get(player.getUniqueId());
+        if (cargoPrefix == null) {
+            var cargo = groups == null ? null : groups.get(safeGroup);
+            cargoPrefix = cargo == null ? "" : prefixAnimation.animate(cargo.prefix(), safeGroup);
+            cargoPrefix = cargoPrefix == null ? "" : ChatColor.translateAlternateColorCodes('&', cargoPrefix);
+        }
+        String rgbColor = resolveRgbColor(groups, safeGroup);
+        renderCustomName(player, cargoPrefix, rgbColor);
     }
 
     public void setNametagSuffix(Player player, String suffix, String group, GroupService groups) {

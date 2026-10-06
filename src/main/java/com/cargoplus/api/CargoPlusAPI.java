@@ -50,6 +50,15 @@ public final class CargoPlusAPI {
     public Map<String, String> getChatColors() { return permissions.getChatColors(); }
     public String getDefaultChatColor() { return permissions.getDefaultChatColor(); }
     public GroupService groups() { return groups; }
+    /** Define um prefixo visual extra antes do cargo na nametag customizada. */
+    public void setNametagExtraPrefix(UUID uuid, String prefix) {
+        if (uuid == null || nicknameColors == null) return;
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) return;
+        String group = getGroup(uuid);
+        nicknameColors.setNametagExtraPrefix(player, prefix, group, groups);
+    }
+
     /** Define o sufixo visual da nametag customizada acima da cabeça. */
     public void setNametagSuffix(UUID uuid, String suffix) {
         if (uuid == null || nicknameColors == null) return;
