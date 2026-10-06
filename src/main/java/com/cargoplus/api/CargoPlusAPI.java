@@ -25,6 +25,12 @@ public final class CargoPlusAPI {
     }
 
     public String getGroup(UUID uuid) { return permissions.getGroup(uuid); }
+    public String getDisplayName(UUID uuid) {
+        String group = getGroup(uuid);
+        if (group == null || group.isBlank()) return "";
+        var cargo = groups.get(group);
+        return cargo == null || cargo.displayName() == null ? "" : cargo.displayName();
+    }
     /** Retorna o prefixo estático para integrações que não devem usar animação. */
     public String getPrefix(UUID uuid) {
         String group = getGroup(uuid);
