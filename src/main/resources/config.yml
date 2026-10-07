@@ -81,6 +81,7 @@ groups:
       - coinseconomy.coins
       - coinseconomy.pagar
       - coinseconomy.top
+      - coinseconomy.banco
     parents: []
   ajudante:
     display-name: "Ajudante"
