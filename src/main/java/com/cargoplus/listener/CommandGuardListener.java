@@ -35,7 +35,7 @@ public final class CommandGuardListener implements Listener {
         String label = normalize(parts[0]);
         Command command = findCommand(label);
 
-        if (isServerReload(label) || isPluginReload(label, parts, command)) {
+        if (isServerReload(label) || isPluginReload(label, parts, command) || isBlockedBukkitCommand(player, label)) {
             deny(player);
             event.setCancelled(true);
             return;
@@ -62,7 +62,7 @@ public final class CommandGuardListener implements Listener {
 
         while (iterator.hasNext()) {
             String label = normalize(iterator.next());
-            if (isServerReload(label)) {
+            if (isServerReload(label) || isBlockedBukkitCommand(player, label)) {
                 iterator.remove();
                 continue;
             }
@@ -101,6 +101,15 @@ public final class CommandGuardListener implements Listener {
             case "setcargo" -> false;
             default -> false;
         };
+    }
+
+    private boolean isBlockedBukkitCommand(Player player, String label) {
+        if (player == null) return false;
+        String group = plugin.permissions().getGroup(player.getUniqueId());
+        if (group == null || !group.equalsIgnoreCase("dev")) return false;
+
+        String normalized = normalize(label);
+        return normalized.equals("bukkit") || normalized.startsWith("bukkit:");
     }
 
     private boolean isServerReload(String label) {
