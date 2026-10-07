@@ -176,6 +176,7 @@ groups:
       - cargoplus.removercargo
       - cargoplus.admin
       - performanceplus.admin
+      - minecraft.command.gamemode
       - chatplus.cor
       - utilidadesplus.plugins
       - utilidadesplus.configurar
