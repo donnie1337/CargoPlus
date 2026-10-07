@@ -97,6 +97,7 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.fly
       - essentialsplus.gamemode
+
       - essentialsplus.vanish
       - essentialsplus.inspect
       - essentialsplus.ec
