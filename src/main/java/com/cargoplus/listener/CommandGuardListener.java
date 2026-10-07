@@ -35,7 +35,13 @@ public final class CommandGuardListener implements Listener {
         String label = normalize(parts[0]);
         Command command = findCommand(label);
 
-        if (isServerReload(label) || isPluginReload(label, parts, command) || isBlockedBukkitCommand(player, label)) {
+        if (isBlockedBukkitCommand(player, label)) {
+            denyUnknownCommand(player);
+            event.setCancelled(true);
+            return;
+        }
+
+        if (isServerReload(label) || isPluginReload(label, parts, command)) {
             deny(player);
             event.setCancelled(true);
             return;
@@ -176,4 +182,8 @@ public final class CommandGuardListener implements Listener {
     }
 
     private void deny(Player player) { player.sendMessage(plugin.message("no-permission")); }
+
+    private void denyUnknownCommand(Player player) {
+        player.sendMessage("§c§lᴇʀʀᴏ §8• §cComando não encontrado.");
+    }
 }
