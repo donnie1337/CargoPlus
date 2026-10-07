@@ -78,6 +78,9 @@ groups:
       - essentialsplus.tpa
       - essentialsplus.tell
       - clanplus.clan
+      - coinseconomy.coins
+      - coinseconomy.pagar
+      - coinseconomy.top
     parents: []
   ajudante:
     display-name: "Ajudante"
