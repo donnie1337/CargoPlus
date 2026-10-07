@@ -93,6 +93,7 @@ groups:
       - utilidadesplus.configurar
       - essentialsplus.tpa
       - essentialsplus.fly
+      - essentialsplus.gamemode
       - essentialsplus.vanish
       - essentialsplus.inspect
       - essentialsplus.ec
@@ -176,7 +177,7 @@ groups:
       - cargoplus.removercargo
       - cargoplus.admin
       - performanceplus.admin
-      - minecraft.command.gamemode
+
       - chatplus.cor
       - utilidadesplus.plugins
       - utilidadesplus.configurar
