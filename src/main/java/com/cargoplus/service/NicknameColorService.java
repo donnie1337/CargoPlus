@@ -285,6 +285,31 @@ public final class NicknameColorService {
         }
     }
 
+    /**
+     * Recria a nametag customizada após uma atualização de PlayerProfile/skin.
+     * O Paper re-registra o jogador nos clientes nesse processo e o vínculo visual
+     * do TextDisplay passageiro pode ficar stale no cliente, deixando a nametag
+     * parada na posição antiga.
+     */
+    public void refreshAfterProfileUpdate(Player player, String group, GroupService groups) {
+        if (player == null || !player.isOnline()) return;
+        removeNametagDisplay(player);
+
+        String safeGroup = group;
+        if (safeGroup == null || safeGroup.isBlank()) {
+            safeGroup = groups == null ? "membro" : groups.defaultGroup();
+        }
+
+        String prefix = lastRenderedPrefixes.get(player.getUniqueId());
+        if (prefix == null) {
+            var cargo = groups == null ? null : groups.get(safeGroup);
+            prefix = cargo == null ? "" : prefixAnimation.animate(cargo.prefix(), safeGroup);
+            prefix = prefix == null ? "" : ChatColor.translateAlternateColorCodes('&', prefix);
+        }
+
+        renderCustomName(player, prefix, resolveRgbColor(groups, safeGroup));
+    }
+
     public void updateSneakOpacity(Player player) {
         if (player == null) return;
         TextDisplay display = nametagDisplays.get(player.getUniqueId());
